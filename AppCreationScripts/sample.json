@@ -1,0 +1,66 @@
+{
+  "Sample": {
+    "RepositoryUrl": "ms-identity-java-webapi",
+    "Title": "Integrating Azure AD into a Java web api application",
+    "Client": "Java web app",
+    "Level": 300,
+    "Service": "Java Web API",
+    "Endpoint": "Microsoft identity platform (formerly Azure AD v2.0)"
+  },
+  "AADApps": [
+    {
+      "Id": "java_webapp",
+      "Name": "java_webapp",
+      "Kind": "WebApp", /* SinglePageApplication, WebApp, Mobile, UWP, Desktop, Daemon, WebApi, Browserless */
+      "Audience": "AzureADandPersonalMicrosoftAccount", /* AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount */
+      "PasswordCredentials": "Auto",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "service",
+          "DelegatedPermissions": [
+            "User.Read",
+            "access_as_user"
+          ]
+        }
+      ],
+      "ReplyUrls": "https://localhost:8080/msal4jsample/secure/aad, https://localhost:8080/msal4jsample/graph/me",
+      "LogoutUrl": "https://localhost:8080/msal4jsample/sign-out"
+    },
+    {
+      "Id": "java_obo",
+      "Name": "java_obo",
+      "Kind": "WebApi",
+      "Audience": "AzureADandPersonalMicrosoftAccount", /* AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount */
+      "PasswordCredentials": "Auto",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [
+            "User.Read"
+          ]
+        }
+      ]
+    }
+  ],
+  "CodeConfiguration": [
+    {
+      "App": "webApp",
+      "SettingKind": "JSon",
+      "SettingFile": "\\..\\appsettings.json",
+      "Mappings": [
+        {
+          "key": "ClientId",
+          "value": ".AppId"
+        },
+        {
+          "key": "TenantId",
+          "value": "$tenantId"
+        },
+        {
+          "key": "Domain",
+          "value": "$tenantName"
+        }
+      ]
+    }
+  ]
+}

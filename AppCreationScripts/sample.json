@@ -9,7 +9,19 @@
   },
   "AADApps": [
     {
-      "Id": "java_webapp",
+      "Id": "service",
+      "Name": "java_obo",
+      "Kind": "WebApi",
+      "PasswordCredentials": "Auto",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": ["User.Read"]
+        }
+      ]
+    },
+    {
+      "Id": "client",
       "Name": "java_webapp",
       "Kind": "WebApp", /* SinglePageApplication, WebApp, Mobile, UWP, Desktop, Daemon, WebApi, Browserless */
       "Audience": "AzureADandPersonalMicrosoftAccount", /* AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount */
@@ -17,45 +29,19 @@
       "RequiredResourcesAccess": [
         {
           "Resource": "service",
-          "DelegatedPermissions": [
-            "User.Read",
-            "access_as_user"
-          ]
+          "DelegatedPermissions": ["access_as_user"]
         }
       ],
-      "ReplyUrls": "https://localhost:8080/msal4jsample/secure/aad, https://localhost:8080/msal4jsample/graph/me",
+      "ReplyUrls": "https://localhost:8080/msal4jsample/secure/aad",
       "LogoutUrl": "https://localhost:8080/msal4jsample/sign-out"
-    },
-    {
-      "Id": "java_obo",
-      "Name": "java_obo",
-      "Kind": "WebApi",
-      "Audience": "AzureADandPersonalMicrosoftAccount", /* AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount */
-      "PasswordCredentials": "Auto",
-      "RequiredResourcesAccess": [
-        {
-          "Resource": "Microsoft Graph",
-          "DelegatedPermissions": [
-            "User.Read"
-          ]
-        }
-      ]
     }
   ],
   "CodeConfiguration": [
     {
-      "App": "webApp",
-      "SettingKind": "JSon",
-      "SettingFile": "\\..\\appsettings.json",
+      "App": "client",
+      "SettingKind": "Text",
+      "SettingFile": "\\..\\Client\\appsettings.json",
       "Mappings": [
-        {
-          "key": "ClientId",
-          "value": ".AppId"
-        },
-        {
-          "key": "TenantId",
-          "value": "$tenantId"
-        },
         {
           "key": "Domain",
           "value": "$tenantName"

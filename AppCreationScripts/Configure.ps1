@@ -216,81 +216,31 @@ Function ConfigureApplications
     # Get the user running the script to add the user as the app owner
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
-   # Create the java_webapp AAD application
-   Write-Host "Creating the AAD application (java_webapp)"
-   # Get a 2 years application key for the java_webapp Application
-   $pw = ComputePassword
-   $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
-   $java_webappAppKey = $pw
-   # create the application 
-   $java_webappAadApplication = New-AzureADApplication -DisplayName "java_webapp" `
-                                                       -LogoutUrl "https://localhost:8080/msal4jsample/sign-out" `
-                                                       -ReplyUrls "https://localhost:8080/msal4jsample/secure/aad", "https://localhost:8080/msal4jsample/graph/me" `
-                                                       -IdentifierUris "https://$tenantName/java_webapp" `
-                                                       -AvailableToOtherTenants $True `
-                                                       -PasswordCredentials $key `
-                                                       -Oauth2AllowImplicitFlow $true `
-                                                       -PublicClient $False
-
-   # create the service principal of the newly created application 
-   $currentAppId = $java_webappAadApplication.AppId
-   $java_webappServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
-
-   # add the user running the script as an app owner if needed
-   $owner = Get-AzureADApplicationOwner -ObjectId $java_webappAadApplication.ObjectId
-   if ($owner -eq $null)
-   { 
-        Add-AzureADApplicationOwner -ObjectId $java_webappAadApplication.ObjectId -RefObjectId $user.ObjectId
-        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($java_webappServicePrincipal.DisplayName)'"
-   }
-
-
-   Write-Host "Done creating the java_webapp application (java_webapp)"
-
-   # URL of the AAD application in the Azure portal
-   # Future? $java_webappPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$java_webappAadApplication.AppId+"/objectId/"+$java_webappAadApplication.ObjectId+"/isMSAApp/"
-   $java_webappPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$java_webappAadApplication.AppId+"/objectId/"+$java_webappAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>java_webapp</td><td>$currentAppId</td><td><a href='$java_webappPortalUrl'>java_webapp</a></td></tr>" -Path createdApps.html
-
-   $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
-
-   # Add Required Resources Access (from 'java_webapp' to 'service')
-   Write-Host "Getting access from 'java_webapp' to 'service'"
-   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "service" `
-                                                -requiredDelegatedPermissions "User.Read|access_as_user" `
-
-   $requiredResourcesAccess.Add($requiredPermissions)
-
-
-   Set-AzureADApplication -ObjectId $java_webappAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
-   Write-Host "Granted permissions."
-
-   # Create the java_obo AAD application
+   # Create the service AAD application
    Write-Host "Creating the AAD application (java_obo)"
-   # Get a 2 years application key for the java_obo Application
+   # Get a 2 years application key for the service Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
-   $java_oboAppKey = $pw
+   $serviceAppKey = $pw
    # create the application 
-   $java_oboAadApplication = New-AzureADApplication -DisplayName "java_obo" `
-                                                    -AvailableToOtherTenants $True `
-                                                    -PasswordCredentials $key `
-                                                    -PublicClient $False
-   $java_oboIdentifierUri = 'api://'+$java_oboAadApplication.AppId
-   Set-AzureADApplication -ObjectId $java_oboAadApplication.ObjectId -IdentifierUris $java_oboIdentifierUri
+   $serviceAadApplication = New-AzureADApplication -DisplayName "java_obo" `
+                                                   -AvailableToOtherTenants $True `
+                                                   -PasswordCredentials $key `
+                                                   -PublicClient $False
+   $serviceIdentifierUri = 'api://'+$serviceAadApplication.AppId
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -IdentifierUris $serviceIdentifierUri
 
    # create the service principal of the newly created application 
-   $currentAppId = $java_oboAadApplication.AppId
-   $java_oboServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
+   $currentAppId = $serviceAadApplication.AppId
+   $serviceServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
 
    # add the user running the script as an app owner if needed
-   $owner = Get-AzureADApplicationOwner -ObjectId $java_oboAadApplication.ObjectId
+   $owner = Get-AzureADApplicationOwner -ObjectId $serviceAadApplication.ObjectId
    if ($owner -eq $null)
    { 
-        Add-AzureADApplicationOwner -ObjectId $java_oboAadApplication.ObjectId -RefObjectId $user.ObjectId
-        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($java_oboServicePrincipal.DisplayName)'"
+        Add-AzureADApplicationOwner -ObjectId $serviceAadApplication.ObjectId -RefObjectId $user.ObjectId
+        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($serviceServicePrincipal.DisplayName)'"
    }
 
     # rename the user_impersonation scope if it exists to match the readme steps or add a new scope
@@ -323,31 +273,83 @@ Function ConfigureApplications
     # add/update scopes
     Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -OAuth2Permission $scopes
 
-   Write-Host "Done creating the java_obo application (java_obo)"
+   Write-Host "Done creating the service application (java_obo)"
 
    # URL of the AAD application in the Azure portal
-   # Future? $java_oboPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$java_oboAadApplication.AppId+"/objectId/"+$java_oboAadApplication.ObjectId+"/isMSAApp/"
-   $java_oboPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$java_oboAadApplication.AppId+"/objectId/"+$java_oboAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>java_obo</td><td>$currentAppId</td><td><a href='$java_oboPortalUrl'>java_obo</a></td></tr>" -Path createdApps.html
+   # Future? $servicePortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
+   $servicePortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
+   Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>java_obo</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
-   # Add Required Resources Access (from 'java_obo' to 'Microsoft Graph')
-   Write-Host "Getting access from 'java_obo' to 'Microsoft Graph'"
+   # Add Required Resources Access (from 'service' to 'Microsoft Graph')
+   Write-Host "Getting access from 'service' to 'Microsoft Graph'"
    $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Microsoft Graph" `
                                                 -requiredDelegatedPermissions "User.Read" `
 
    $requiredResourcesAccess.Add($requiredPermissions)
 
 
-   Set-AzureADApplication -ObjectId $java_oboAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
    Write-Host "Granted permissions."
 
-   # Update config file for 'webApp'
-   $configFile = $pwd.Path + "\..\appsettings.json"
-   Write-Host "Updating the sample code ($configFile)"
-   $dictionary = @{ "ClientId" = $webAppAadApplication.AppId;"TenantId" = $tenantId;"Domain" = $tenantName };
-   UpdateTextFile -configFilePath $configFile -dictionary $dictionary
+   # Create the client AAD application
+   Write-Host "Creating the AAD application (java_webapp)"
+   # Get a 2 years application key for the client Application
+   $pw = ComputePassword
+   $fromDate = [DateTime]::Now;
+   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
+   $clientAppKey = $pw
+   # create the application 
+   $clientAadApplication = New-AzureADApplication -DisplayName "java_webapp" `
+                                                  -LogoutUrl "https://localhost:8080/msal4jsample/sign-out" `
+                                                  -ReplyUrls "https://localhost:8080/msal4jsample/secure/aad" `
+                                                  -IdentifierUris "https://$tenantName/java_webapp" `
+                                                  -AvailableToOtherTenants $True `
+                                                  -PasswordCredentials $key `
+                                                  -Oauth2AllowImplicitFlow $true `
+                                                  -PublicClient $False
+
+   # create the service principal of the newly created application 
+   $currentAppId = $clientAadApplication.AppId
+   $clientServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
+
+   # add the user running the script as an app owner if needed
+   $owner = Get-AzureADApplicationOwner -ObjectId $clientAadApplication.ObjectId
+   if ($owner -eq $null)
+   { 
+        Add-AzureADApplicationOwner -ObjectId $clientAadApplication.ObjectId -RefObjectId $user.ObjectId
+        Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($clientServicePrincipal.DisplayName)'"
+   }
+
+
+   Write-Host "Done creating the client application (java_webapp)"
+
+   # URL of the AAD application in the Azure portal
+   # Future? $clientPortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
+   $clientPortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$clientAadApplication.AppId+"/objectId/"+$clientAadApplication.ObjectId+"/isMSAApp/"
+   Add-Content -Value "<tr><td>client</td><td>$currentAppId</td><td><a href='$clientPortalUrl'>java_webapp</a></td></tr>" -Path createdApps.html
+
+   $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
+
+   # Add Required Resources Access (from 'client' to 'service')
+   Write-Host "Getting access from 'client' to 'service'"
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "java_obo" `
+                                                -requiredDelegatedPermissions "access_as_user" `
+
+   $requiredResourcesAccess.Add($requiredPermissions)
+
+
+   Set-AzureADApplication -ObjectId $clientAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Write-Host "Granted permissions."
+
+   # Configure known client applications for service 
+   Write-Host "Configure known client applications for the 'service'"
+   $knowApplications = New-Object System.Collections.Generic.List[System.String]
+    $knowApplications.Add($clientAadApplication.AppId)
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -KnownClientApplications $knowApplications
+   Write-Host "Configured."
+
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }

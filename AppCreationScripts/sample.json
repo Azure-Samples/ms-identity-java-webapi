@@ -13,6 +13,7 @@
       "Name": "java_obo",
       "Kind": "WebApi",
       "PasswordCredentials": "Auto",
+      "Homepage":"https://localhost:8081",
       "RequiredResourcesAccess": [
         {
           "Resource": "Microsoft Graph",
@@ -26,6 +27,7 @@
       "Kind": "WebApp", /* SinglePageApplication, WebApp, Mobile, UWP, Desktop, Daemon, WebApi, Browserless */
       "Audience": "AzureADandPersonalMicrosoftAccount", /* AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount */
       "PasswordCredentials": "Auto",
+      "Homepage":"https://localhost:8080",
       "RequiredResourcesAccess": [
         {
           "Resource": "service",

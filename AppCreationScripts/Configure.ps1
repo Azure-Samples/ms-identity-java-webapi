@@ -225,6 +225,7 @@ Function ConfigureApplications
    $serviceAppKey = $pw
    # create the application 
    $serviceAadApplication = New-AzureADApplication -DisplayName "java_obo" `
+                                                   -HomePage "https://localhost:8081" `
                                                    -AvailableToOtherTenants $True `
                                                    -PasswordCredentials $key `
                                                    -PublicClient $False
@@ -302,6 +303,7 @@ Function ConfigureApplications
    $clientAppKey = $pw
    # create the application 
    $clientAadApplication = New-AzureADApplication -DisplayName "java_webapp" `
+                                                  -HomePage "https://localhost:8080" `
                                                   -LogoutUrl "https://localhost:8080/msal4jsample/sign-out" `
                                                   -ReplyUrls "https://localhost:8080/msal4jsample/secure/aad" `
                                                   -IdentifierUris "https://$tenantName/java_webapp" `
@@ -349,6 +351,8 @@ Function ConfigureApplications
     $knowApplications.Add($clientAadApplication.AppId)
    Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -KnownClientApplications $knowApplications
    Write-Host "Configured."
+
+
 
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  

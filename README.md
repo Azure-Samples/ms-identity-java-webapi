@@ -2,11 +2,11 @@
 page_type: sample
 languages:
 - java
-- powershell
-- html
 products:
-- azure-active-directory
-description: "This sample demonstrates a Java web application calling an OBO service, which in turn calls Microsoft Graph API using the On-Behalf-Of flow which are all secured by Microsoft identity platform."
+  - azure
+  - azure-active-directory
+  - java
+description: "This sample demonstrates calling a downstream web API from another web API in Microsoft identity platform using the On-Behalf-Of flow"
 urlFragment: ms-identity-java-webapi
 ---
 
@@ -16,16 +16,16 @@ urlFragment: ms-identity-java-webapi
 
 ### Overview
 
-This sample demonstrates a Java web application calling an OBO service, which in turn call the [Microsoft Graph](https://graph.microsoft.com) using the On_Behalf_Of flow. All these are secured using the Microsoft identity platform.
+This sample demonstrates a Java web application calling a downstream Web API, [Microsoft Graph](https://graph.microsoft.com) using the [On-Behalf-Of](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow) flow. All these are secured using the Microsoft identity platform.
 
-1. The Java web application uses the Microsoft Authentication Library for Java (MSAL4J) to obtain an Access token from Azure Active Directory(AD) for authenticated users.
-2. The access token is used as a bearer token to authenticate the user when calling the Java Web API and the Microsoft Graph API.
+1. The Java web application uses the [Microsoft Authentication Library for Java (MSAL4J)](https://github.com/AzureAD/microsoft-authentication-library-for-java) to obtain an Access token the Microsoft identity platform for the authenticated user.
+2. The access token is used as a bearer token to authenticate the user when calling the Java Web API and then the Microsoft Graph API.
 
 The flow is as follows:
 
-1. Sign-in the user in the client(web) application
-1. Acquire a token to the Java Web API and call it.
-1. The Java Web API then calls another downstream Web API (The Microsoft Graph).
+1. Sign-in the user in the client(web) application.
+1. Acquire a token for the Java Web API and call it.
+1. The Java Web API then calls the Microsoft Graph using another access token obtained using the on-behalf-of flow.
 
 ### Scenario
 
@@ -52,13 +52,7 @@ From your shell or command line:
 
 ### Step 3:  Register the sample with your Azure Active Directory tenant
 
-There are two projects in this sample. Each needs to be separately registered in your Azure AD tenant. To register these projects, you can:
-
-- either follow the steps in the paragraphs below
-- or use PowerShell scripts that:
-  - **automatically** create for you the Azure AD applications and related objects (passwords, permissions, dependencies) and modify the application configuration files manually.
-
-If you want to use this automation, read the instructions in [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md).
+There are two projects in this sample. Each needs to be registered separately in your Azure AD tenant. To register these projects:
 
 #### First step: choose the Azure AD tenant where you want to create your applications
 
@@ -73,21 +67,20 @@ application, from the *Favorites* or *All Directories* list.
 > In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are
 presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
 
-#### Register the webapp (Webapp-Openidconnect)
+#### Register the client web app (Webapp-Openidconnect)
 
 1. In the  **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
-1. Enter a friendly name for the application, for example 'java-webapp', select "Accounts in any organizational directory
-and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)".
+1. Enter a friendly name for the application, for example 'java-webapp', select **Accounts in any organizational directory
+and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click **Register** to register the application.
 1. On the left hand menu, click on **Overview** and :
     - copy **Application (client) ID**
     - copy **Directory (tenant) ID**
-    - You'll need both of these values later to configure the project, so put them in a safe place
-1. On the left hand menu, click on **Authentication**, and under *Redirect URIs*, select "Web". You will need to enter
- two different redirect URIs: one for the signIn page, and one for the graph page. For both, you should use the same
- host and port number, then followed by "/msal4jsample/secure/aad" for the sign in page and
- "msal4jsample/graph/me" for the user info page.
-  By default, the sample uses:
+    - You'll need both of these values later to configure the projects
+1. On the left hand menu, click on the **Authentication** blade, and under *Redirect URIs*, select "Web". You will need to enter
+ two different redirect URIs: one for the sign-In page, and one for the page that calls Graph. For both, you should use the same
+ host and port number, then followed by "/msal4jsample/secure/aad" for the sign in page and "msal4jsample/graph/me" for the user info page.
+ To run this sample, enter the following two urls :
 
     - `http://localhost:8080/msal4jsample/secure/aad`.
     - `http://localhost:8080/msal4jsample/graph/me`
@@ -97,24 +90,22 @@ Click on **save**.
 1. On the left hand menu, choose **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
 
    - Type a key description (of instance `app secret`),
-   - Select a key duration of either **In 1 year**, **In 2 years**, or **Never Expires**.
-   - When you save this page, the key value will be displayed, copy, and save the value in a safe location.
-   - You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by
-   any other means, so record it as soon as it is visible from the Azure portal.
+   - Select one of the provided key durations as per your security needs.
+   - When you save this page, the key value will be displayed. Copy and save the value in a safe location. You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
 
-#### Configure the msal-webapp-sample to use your Azure AD tenant
+#### Configure the **msal-web-sample** to use your Azure AD tenant
 
-Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step. Replace *Enter_the_Tenant_Id_Here* with the tenant id, *Enter_the_Application_Id_here* with the Application Id and *Enter_the_Client_Secret_Here* with the key value noted.
+Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step.
 
-If you did not use the  default redirect URIs, then you'll have to update `aad.redirectUriSignin` and `aad.redirectUriGraph` as well with the registered redirect URIs.
-> You can use any host and port number, but the path must stay the same (/msal4jsample/secure/aad and /msal4jsample/graph/me)
-as these are mapped to the controllers that will process the requests.
+- Replace *Enter_the_Tenant_Id_Here* with the Directory (tenant) ID.
+- *Enter_the_Application_Id_here* with the Application (client) ID.
+- *Enter_the_Client_Secret_Here* with the client secret value noted earlier.
 
-#### Register the webapi app
+#### Register the web Api app (java-webapi)
 
 1. In the  **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
-1. Enter a friendly name for the application, for example 'java-webapi', select "Accounts in any organizational directory
-and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)".
+1. Enter a friendly name for the application, for example 'java-webapi', select **Accounts in any organizational directory
+and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click **Register** to register the application.
 1. On the left hand menu, click on **Overview** and :
     - copy **Application (client) ID**
@@ -124,16 +115,18 @@ and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)".
 1. On the left hand menu, choose **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
 
    - Type a key description (of instance `app secret`),
-   - Select a key duration of either **In 1 year**, **In 2 years**, or **Never Expires**.
-   - When you save this page, the key value will be displayed, copy, and save the value in a safe location.
-   - You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by
-   any other means, so record it as soon as it is visible from the Azure portal.
+   - Select one of the provided key durations as per your security needs.
+   - When you save this page, the key value will be displayed. Copy and save the value in a safe location. You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
 
-#### Configure the msal-obo-sample to use your Azure AD tenant
+#### Configure the **msal-obo-sample** to use your Azure AD tenant
 
-Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step. Replace *Enter_the_Tenant_Id_Here* with the *Tenant Id*, *Enter_the_Application_Id_here* with the *Application Id* and *Enter_the_Client_Secret_Here* with the *key value* noted.
+Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step. - - 
 
-### Step 4: Run the application
+- Replace *Enter_the_Tenant_Id_Here* with  Directory (tenant) ID.
+- *Enter_the_Application_Id_here* withthe Application (client) ID.
+- *Enter_the_Client_Secret_Here* with the *key value* noted.
+
+### Step 4: Run the applications
 
 To run the project, you can either:
 
@@ -215,7 +208,7 @@ Tomcats default port is 8080. This can be changed by
 
 Example: `http://localhost:8080/msal4jsample`
 
-### You're done
+### You're done, run the code
 
 Click on "Login" to start the process of logging in. Once logged in, you'll see the account information for the user that is logged in and a Button "Call OBO API" , which will call the Microsoft Graph API with the OBO token and display the basic information of the signed-in user. You'll then have the option to "Sign out".
 
@@ -286,7 +279,7 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
 
 Use [Stack Overflow](http://stackoverflow.com/questions/tagged/adal) to get support from the community.
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
-Make sure that your questions or comments are tagged with [`msal` `Java`].
+Make sure that your questions or comments are tagged with [`msal4j` `Java`].
 
 If you find a bug in the sample, please raise the issue on [GitHub Issues](https://github.com/Azure-Samples/ms-identity-java-webapp/issues).
 
@@ -298,12 +291,12 @@ If you'd like to contribute to this sample, see [CONTRIBUTING.MD](https://github
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-## More information
+## Other samples and documentation
 
 - For more information, see MSAL4J [conceptual documentation](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki)
-
-- Other samples for the Microsoft identity platform are available from [Microsoft identity platform code samples](https://aka.ms/aaddevsamplesv2).
-
+- Other samples for Microsoft identity platform are available from [https://aka.ms/aaddevsamplesv2](https://aka.ms/aaddevsamplesv2)
+- [Microsoft identity platform and OAuth 2.0 On-Behalf-Of flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow)
+- the documentation for Microsoft identity platform is available from [https://aka.ms/aadv2](https://aka.ms/aadv2)
 - For more information about web apps scenarios on the Microsoft identity platform see [Scenario: Web app that signs in users](https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-sign-user-overview) and [Scenario: Web app that calls web APIs](https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-overview)
-
-- For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
+- [Why update to Microsoft identity platform?](https://docs.microsoft.com/en-us/azure/active-directory/develop/azure-ad-endpoint-comparison)
+For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).

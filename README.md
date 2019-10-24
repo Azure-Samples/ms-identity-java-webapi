@@ -62,76 +62,90 @@ As a first step you'll need to:
 1. On the top bar, click on your account, and then on **Switch Directory**.
 1. Once the *Directory + subscription* pane opens, choose the Active Directory tenant where you wish to register your
 application, from the *Favorites* or *All Directories* list.
-1. Click on **All services** in the left-hand nav, and choose **Azure Active Directory**.
+1. Click on **All services** in the menu and choose **Azure Active Directory**.
 
 > In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are
 presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
 
-#### Register the client web app (Webapp-Openidconnect)
+#### Register the Web Api app (java-webapi)
 
 1. In the  **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
-1. Enter a friendly name for the application, for example 'java-webapp', select **Accounts in any organizational directory
-and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
-1. Click **Register** to register the application.
-1. On the left hand menu, click on **Overview** and :
-    - copy **Application (client) ID**
-    - copy **Directory (tenant) ID**
-    - You'll need both of these values later to configure the projects
-1. On the left hand menu, click on the **Authentication** blade, and under *Redirect URIs*, select "Web". You will need to enter
- two different redirect URIs: one for the sign-In page, and one for the page that calls Graph. For both, you should use the same
- host and port number, then followed by "/msal4jsample/secure/aad" for the sign in page and "msal4jsample/graph/me" for the user info page.
- To run this sample, enter the following two urls :
-
-    - `http://localhost:8080/msal4jsample/secure/aad`.
-    - `http://localhost:8080/msal4jsample/graph/me`
-
-Click on **save**.
-
-1. On the left hand menu, choose **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
-
-   - Type a key description (of instance `app secret`),
-   - Select one of the provided key durations as per your security needs.
-   - When you save this page, the key value will be displayed. Copy and save the value in a safe location. You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
-
-#### Configure the **msal-web-sample** to use your Azure AD tenant
-
-Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step.
-
-- Replace *Enter_the_Tenant_Id_Here* with the Directory (tenant) ID.
-- *Enter_the_Application_Id_here* with the Application (client) ID.
-- *Enter_the_Client_Secret_Here* with the client secret value noted earlier.
-
-#### Register the web Api app (java-webapi)
-
-1. In the  **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
-1. Enter a friendly name for the application, for example 'java-webapi', select **Accounts in any organizational directory
-and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
+1. Enter a friendly name for the application, for example 'java-webapi', select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click **Register** to register the application.
 1. On the left hand menu, click on **Overview** and :
     - copy **Application (client) ID**
     - copy **Directory (tenant) ID**
     - You'll need both of these values later to configure the project, so put them in a safe place.
 
-1. On the left hand menu, choose **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
+1. Select **Certificates & Secrets** blade and click on `New client secret` in the **Client Secrets** section:
+
+   - Type a key description (for instance `app secret`).
+   - Select one of the provided key durations as per your security needs.
+   - When you save this page, the key value will be displayed. Copy the value and save for later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
+
+1. In the Application menu blade select **Expose an API**, click on **Add a scope**
+    - Accept the proposed **Application ID URI** (api://{clientId}) by selecting **save and continue**.
+    - For **scope name** use **access_as_user**
+    - Select **Admins and users** for **who can consent**.
+    - In **Admin consent display name** type `Access Webapi as a user`
+    - In **Admin consent description** type `Allow the application to access Webapi on behalf of the signed-in user.`
+    - In **User consent display name** type `Access Webapi as a user`
+    - In **User consent description** type `Allow the application to access Webapi on your behalf.`
+    - Keep **State** as **Enabled**
+    - Select **Add scope**
+
+#### Configure the **msal-obo-sample** to use your Azure AD tenant
+
+Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in the above registration step.
+
+- Replace *Enter_the_Tenant_Info_Here* with  Directory (tenant) ID.
+- *Enter_the_Application_Id_here* with the Application (client) ID.
+- *Enter_the_Client_Secret_Here* with the *key value* noted.
+
+#### Register the client Web app (Webapp-Openidconnect)
+
+1. In the **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
+1. Enter a friendly name for the application, for example 'java-webapp', select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
+1. Click **Register** to register the application.
+1. On the **Overview** page:
+    - copy **Application (client) ID**
+    - copy **Directory (tenant) ID**
+    - You'll need both of these values later to configure the projects
+1. Select the **Authentication** blade, and under *Redirect URIs*, select "Web".
+    You will need to enter two different redirect URIs: one for the sign-In page, and one for the page that calls Graph. For both, you should use the same host and port number, then followed by "/msal4jsample/secure/aad" for the sign in page and "msal4jsample/graph/me" for the user info page.
+    To run this sample, enter the following two urls :
+
+    - `http://localhost:8080/msal4jsample/secure/aad`.
+    - `http://localhost:8080/msal4jsample/graph/me`
+
+Click on **save**.
+
+1. Select **Certificates & Secrets** blade and click on `New client secret` in the **Client Secrets** section:
 
    - Type a key description (of instance `app secret`),
    - Select one of the provided key durations as per your security needs.
    - When you save this page, the key value will be displayed. Copy and save the value in a safe location. You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
 
-#### Configure the **msal-obo-sample** to use your Azure AD tenant
+1. Select **API Permissions** blade:
+   - Click the **Add a permission** button,
+   - Select the **My APIs** tab,
+   - In the list of APIs, select the API `Web Api app`,
+   - In the **Delegated permissions** section, ensure that the right permissions are checked: **access_as_user**,
+   - Select the **Add permissions** button.
 
-Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step. - - 
+#### Configure the **msal-web-sample** to use your Azure AD tenant
 
-- Replace *Enter_the_Tenant_Id_Here* with  Directory (tenant) ID.
-- *Enter_the_Application_Id_here* withthe Application (client) ID.
-- *Enter_the_Client_Secret_Here* with the *key value* noted.
+Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step.
+
+- Replace *Enter_the_Application_Id_here* with the Application (client) ID.
+- Replace *Enter_the_Client_Secret_Here* with the client secret value noted earlier.
+- Replace *<OboApi>* with the api exposed in the `Web Api app` (api://{clientId})
 
 ### Step 4: Run the applications
 
 To run the project, you can either:
 
-- Run it directly from your IDE by using the embedded spring boot server
-- or package it to a WAR file using [maven](https://maven.apache.org/plugins/maven-war-plugin/usage.html) and deploy it a J2EE container solution for example [Tomcat](https://tomcat.apache.org/maven-plugin-trunk/tomcat6-maven-plugin/examples/deployment.html)
+Run it directly from your IDE by using the embedded spring boot server or package it to a WAR file using [maven](https://maven.apache.org/plugins/maven-war-plugin/usage.html) and deploy it a J2EE container solution for example [Tomcat](https://tomcat.apache.org/maven-plugin-trunk/tomcat6-maven-plugin/examples/deployment.html)
 
 #### Running from IDE
 

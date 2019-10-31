@@ -60,16 +60,14 @@ As a first step you'll need to:
 
 1. Sign in to the [Azure portal](https://portal.azure.com).
 1. On the top bar, click on your account, and then on **Switch Directory**.
-1. Once the *Directory + subscription* pane opens, choose the Active Directory tenant where you wish to register your
-application, from the *Favorites* or *All Directories* list.
+1. Once the *Directory + subscription* pane opens, choose the Active Directory tenant where you wish to register your application, from the *Favorites* or *All Directories* list.
 1. In the portal menu click on **All services** and choose **Azure Active Directory**.
 
-> In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are
-presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
+> In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
 
 #### Register the Web Api app (java-webapi)
 
-1. In the  **Azure Active Directory** blade, click on **App registrations** and choose **New registration**.
+1. In the  **Azure Active Directory** menu blade, select **App registrations** and choose **New registration**.
 1. Enter a friendly name for the application, for example 'java-webapi' and select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click **Register** to register the application.
 1. On the app **Overview** page:
@@ -77,13 +75,13 @@ presented in the **Properties** of the Azure Active Directory window respectivel
     - copy **Directory (tenant) ID**
     - You'll need both of these values later to configure the project, so save them in a safe place.
 
-1. In the Application menu blade select **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
+1. In the Application menu blade, select **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
 
    - Type a key description (for instance `app secret`).
    - Select one of the provided key durations as per your security needs.
-   - Key value will be displayed when you click on **Add**. Copy the value and save for later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
+   - Key value will be displayed when you click **Add**. Copy the value and save for later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
 
-1. In the Application menu blade select **Expose an API**, click on **Add a scope**
+1. In the Application menu blade, select **Expose an API**, click on **Add a scope**
     - Accept the proposed **Application ID URI** (api://{clientId}) by selecting **save and continue**.
     - For **scope name** use **access_as_user**
     - Select **Admins and users** for **who can consent**.
@@ -92,7 +90,7 @@ presented in the **Properties** of the Azure Active Directory window respectivel
     - In **User consent display name** type `Access Webapi as a user`
     - In **User consent description** type `Allow the application to access Webapi on your behalf.`
     - Keep **State** as **Enabled**
-    - Select **Add scope**
+    - Click **Add scope**.
 
 #### Configure the **msal-obo-sample** to use your Azure AD tenant
 
@@ -104,29 +102,29 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 
 #### Register the client Web app (java-webapp)
 
-1. In the **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
+1. In the **Azure Active Directory** menu blade, select **App registrations** and choose **New registration**.
 1. Enter a friendly name for the application, for example 'java-webapp', select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click **Register** to register the application.
 1. On the **Overview** page:
     - copy **Application (client) ID**
     - copy **Directory (tenant) ID**
     - You'll need both of these values later to configure the projects
-1. Select the **Authentication** blade, and under *Redirect URIs*, select "Web".
-    You will need to enter two different redirect URIs: one for the sign-In page, and one for the page that calls Graph. For both, you should use the same host and port number, then followed by "/msal4jsample/secure/aad" for the sign in page and "msal4jsample/graph/me" for the user info page.
-    To run this sample, enter the following two urls :
+1. In the Application menu blade, select the **Authentication** and under *Redirect URIs*, select **Web**.
+    You will need to enter two different redirect URIs: one for the sign-In page, and one for the page that calls Graph. For both, you should use the same host and port number, then followed by */msal4jsample/secure/aad* for the sign in page and */msal4jsample/graph/me* for the user info page.
+    To run this sample, enter the following two urls:
 
     - `http://localhost:8080/msal4jsample/secure/aad`.
     - `http://localhost:8080/msal4jsample/graph/me`
 
-Click on **save**.
+Click **save**.
 
-1. Select **Certificates & Secrets** blade and click on `New client secret` in the **Client Secrets** section:
+1. In the Application menu blade, select **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
 
    - Type a key description (for instance `app secret`),
    - Select one of the provided key durations as per your security needs.
    - When you save this page, the key value will be displayed. Copy and save the value in a safe location. You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
 
-1. Select **API Permissions** blade:
+1. In the Application menu blade, select **API Permissions**:
    - Click the **Add a permission** button,
    - Select the **My APIs** tab,
    - In the list of APIs, select the API `Web Api app`,
@@ -140,6 +138,19 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 - Replace *Enter_the_Application_Id_here* with the **Application (client) ID**.
 - Replace *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
 - Replace *OboApi* with the API exposed in the `Web Api app` **(api://{clientId})**.
+
+#### Configure known client applications for service (java-webapi)
+
+For the middle tier web API (`java-webapi`) to be able to call the downstream web APIs, the user must grant the middle tier permission to do so in the form of consent.
+However, since the middle tier has no interactive UI of its own, you need to explicitly bind the client app registration in Azure AD, with the registration for the web API.
+This binding merges the consent required by both the client and middle tier into a single dialog, which will be presented to the user by the client for the first time when the user signs-in.
+You can do so by adding the "Client ID" of the client app, to the manifest of the web API in the `knownClientApplications` property. Here's how:
+
+In the [Azure portal](https://portal.azure.com), navigate to your `java-webapi` app registration:
+
+- In the Application menu blade, select **Manifest**.
+- Find the attribute **knownClientApplications** and add your client application's(`java-webapp`) **Application (client) Id** as its element.
+- Click **Save**.
 
 ### Step 4: Run the applications
 
@@ -155,17 +166,17 @@ The following steps are for IntelliJ IDEA. But you can choose and work with any 
 
 1. Navigate to *Run* --> *Edit Configurations* from menu bar.
 2. Click on '+' (Add new configuration) and select *Application*.
-3. Enter name of the application for example 'webapp'
-4. Go to main class and select from the dropdown, for example 'MsalWebSampleApplication' also go to *Use classpath of the module* and select from the dropdown, for example 'msal-web-sample'.
+3. Enter name of the application for example `webapp`
+4. Go to main class and select from the dropdown, for example `MsalWebSampleApplication` also go to *Use classpath of the module* and select from the dropdown, for example `msal-web-sample`.
 5. Click on *Apply*. Follow the same instructions for adding the another application.
 6. Click on '+' (Add new configuration) and select *Compound*.
-7. Enter a friendly name for in the *Name* for example 'Msal-webapi-sample'.
+7. Enter a friendly name for in the *Name* for example `Msal-webapi-sample`.
 8. Click on '+' and select the application names you have created in the above steps one at a time.
-9. Click on *Apply*. Select the created configuration and click *Run*. Now both the projects will run at a time.
+9. Click on *Apply*. Select the created configuration and click **Run**. Now both the projects will run at a time.
 
 - Now navigate to the home page of the project. For this sample, the standard home page URL is <http://localhost:8080>
 
-##### Packaging and deploying to container
+#### Packaging and deploying to container
 
 If you would like to deploy the sample to Tomcat, you will need to make a couple of changes to the source code in both modules.
 
@@ -235,27 +246,41 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
 
 1. AuthPageController class
 
-    Contains the api to interact with the web app. The securePage method handles the authentication part and signs in the user using microsoft authentication
+    Contains the api to interact with the web app. The securePage method handles the authentication part and signs in the user using microsoft authentication.
 
 2. AuthHelper class
 
-    Contains helper methods to handle authentication
+    Contains helper methods to handle authentication.
 
-    A code snippet showing how to obtain auth result
+    A code snippet showing how to obtain auth result by silent flow.
 
     ```java
+
+        private ConfidentialClientApplication createClientApplication() throws MalformedURLException {
+            return ConfidentialClientApplication.builder(clientId, ClientCredentialFactory.create(clientSecret))
+                                                .authority(authority)
+                                                .build();
+        }...
+
           SilentParameters parameters = SilentParameters.builder(
                         Collections.singleton(scope),
                         result.account()).build();
 
                 CompletableFuture<IAuthenticationResult> future = app.acquireTokenSilently(parameters);
+                ...
 
-                updatedResult = future.get();
+        storeTokenCacheInSession(httpRequest, app.tokenCache().serialize());
+        ...
     ```
+
+    Important things to notice:
+
+    - We create a `ConfidentialClientApplication` using **MSAL Build Pattern** passing the `clientId`, `clientSecret` and `authority` in the builder. This `ConfidentialClientApplication` will be responsible of acquiring access tokens later in the code.
+    - `ConfidentialClientApplication` also has a token cache, that will cache [access tokens](https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens) and [refresh tokens](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow#refresh-the-access-token) for the signed-in user. This is done so that the application can fetch access tokens after they have expired without prompting the user to sign-in again.
 
 3. AuthFilter class
 
-    Contains method for session and state management
+    Contains methods for session and state management.
 
 ### msal-obo-sample
 
@@ -293,6 +318,7 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
 3. MsalAuthHelper class
 
     Contains the methods to obtain the auth token and obo token to enable on-behalf-of flow.
+
     A code snippet showing how to obtain obo token
 
     ```java

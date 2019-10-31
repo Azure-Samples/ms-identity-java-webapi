@@ -62,26 +62,26 @@ As a first step you'll need to:
 1. On the top bar, click on your account, and then on **Switch Directory**.
 1. Once the *Directory + subscription* pane opens, choose the Active Directory tenant where you wish to register your
 application, from the *Favorites* or *All Directories* list.
-1. Click on **All services** in the menu and choose **Azure Active Directory**.
+1. In the portal menu click on **All services** and choose **Azure Active Directory**.
 
 > In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are
 presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
 
 #### Register the Web Api app (java-webapi)
 
-1. In the  **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
-1. Enter a friendly name for the application, for example 'java-webapi', select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
+1. In the  **Azure Active Directory** blade, click on **App registrations** and choose **New registration**.
+1. Enter a friendly name for the application, for example 'java-webapi' and select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click **Register** to register the application.
-1. On the left hand menu, click on **Overview** and :
+1. On the app **Overview** page:
     - copy **Application (client) ID**
     - copy **Directory (tenant) ID**
-    - You'll need both of these values later to configure the project, so put them in a safe place.
+    - You'll need both of these values later to configure the project, so save them in a safe place.
 
-1. Select **Certificates & Secrets** blade and click on `New client secret` in the **Client Secrets** section:
+1. In the Application menu blade select **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
 
    - Type a key description (for instance `app secret`).
    - Select one of the provided key durations as per your security needs.
-   - When you save this page, the key value will be displayed. Copy the value and save for later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
+   - Key value will be displayed when you click on **Add**. Copy the value and save for later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
 
 1. In the Application menu blade select **Expose an API**, click on **Add a scope**
     - Accept the proposed **Application ID URI** (api://{clientId}) by selecting **save and continue**.
@@ -98,11 +98,11 @@ presented in the **Properties** of the Azure Active Directory window respectivel
 
 Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in the above registration step.
 
-- Replace *Enter_the_Tenant_Info_Here* with  Directory (tenant) ID.
-- *Enter_the_Application_Id_here* with the Application (client) ID.
-- *Enter_the_Client_Secret_Here* with the *key value* noted.
+- Replace *Enter_the_Tenant_Info_Here* with  **Directory (tenant) ID**.
+- *Enter_the_Application_Id_here* with the **Application (client) ID**.
+- *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
 
-#### Register the client Web app (Webapp-Openidconnect)
+#### Register the client Web app (java-webapp)
 
 1. In the **Azure Active Directory** pane, click on **App registrations** and choose **New registration**.
 1. Enter a friendly name for the application, for example 'java-webapp', select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
@@ -122,7 +122,7 @@ Click on **save**.
 
 1. Select **Certificates & Secrets** blade and click on `New client secret` in the **Client Secrets** section:
 
-   - Type a key description (of instance `app secret`),
+   - Type a key description (for instance `app secret`),
    - Select one of the provided key durations as per your security needs.
    - When you save this page, the key value will be displayed. Copy and save the value in a safe location. You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
 
@@ -137,9 +137,9 @@ Click on **save**.
 
 Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step.
 
-- Replace *Enter_the_Application_Id_here* with the Application (client) ID.
-- Replace *Enter_the_Client_Secret_Here* with the client secret value noted earlier.
-- Replace *<OboApi>* with the api exposed in the `Web Api app` (api://{clientId})
+- Replace *Enter_the_Application_Id_here* with the **Application (client) ID**.
+- Replace *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
+- Replace *OboApi* with the API exposed in the `Web Api app` **(api://{clientId})**.
 
 ### Step 4: Run the applications
 
@@ -163,14 +163,14 @@ The following steps are for IntelliJ IDEA. But you can choose and work with any 
 8. Click on '+' and select the application names you have created in the above steps one at a time.
 9. Click on *Apply*. Select the created configuration and click *Run*. Now both the projects will run at a time.
 
-- Now navigate to the home page of the project. For this sample, the standard home page URL is <http://localhost:8080
+- Now navigate to the home page of the project. For this sample, the standard home page URL is <http://localhost:8080>
 
 ##### Packaging and deploying to container
 
 If you would like to deploy the sample to Tomcat, you will need to make a couple of changes to the source code in both modules.
 
 1. Open msal-webapp-sample/pom.xml
-    - Under `<name>msal-webapp-sample</name>` add `<packaging>war</packaging>`
+    - Under `<name>msal-web-sample</name>` add `<packaging>war</packaging>`
     - Add dependency:
 
          ```xml
@@ -181,12 +181,12 @@ If you would like to deploy the sample to Tomcat, you will need to make a couple
          </dependency>
          ```
 
-2. Open msal-webapp-sample/src/main/java/com.microsoft.azure.msalwebappsample/MsalWebAppSampleApplication
+2. Open msal-web-sample/src/main/java/com.microsoft.azure.msalwebsample/MsalWebSampleApplication
 
     - Delete all source code and replace with
 
     ```Java
-        package com.microsoft.azure.msalwebappsample;
+        package com.microsoft.azure.msalwebsample;
 
         import org.springframework.boot.SpringApplication;
         import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -208,10 +208,11 @@ If you would like to deploy the sample to Tomcat, you will need to make a couple
 
 3. Open a command prompt, go to the root folder of the project, and run `mvn package`
 
-- This will generate a `msal-webapi-sample-0.1.0.war` file in your /targets directory.
+- This will generate a `msal-web-sample-0.1.0.war` file in your /targets directory.
 - Rename this file to `ROOT.war`
 - Deploy this war file using Tomcat or any other J2EE container solution.
-- To deploy on Tomcat container, copy the .war file to the webapis folder under your Tomcat installation and then start the Tomcat server.
+- To deploy on Tomcat container, copy the .war file to the webapps folder under your Tomcat installation and then start the Tomcat server.
+- Repeat these steps for the `msal-obo-sample` also.
 
 This WAR will automatically be hosted at `http:<yourserverhost>:<yourserverport>/`
 
@@ -262,9 +263,23 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
 
     Contains the api(graphMeApi) to trigger the obo flow. The graphMeApi method gets the obo access token using MsalAuthHelper. The callMicrosoftGraphEndPoint method calls the Microsoft graph API using obo token.
 
+    ```java
+    String oboAccessToken = msalAuthHelper.getOboToken("https://graph.microsoft.com/.default");
+
+        return callMicrosoftGraphMeEndpoint(oboAccessToken);
+    ```
+
+    Important things to notice:
+
+    - The scope [.default](https://docs.microsoft.com/en-us/azure/active-directory/developv2-permissions-and-consent#the-default-scope) is a built-in scope for every application that refers to the static list of permissions configured on the application registration. In our scenario here, it enables the user to grant consent for permissions for both the Web API and the downstream API (Microsoft Graph). For example, the permissions for the Web API and the downstream API (Microsoft Graph) are listed below:
+             - Web Api sample (access_as_user)
+             - Microsoft Graph (user.read)
+
+    - When you use the `.default` scope, the end user is prompted for a combined set of permissions that include scopes from both the **Web Api** and **Microsoft Graph**.
+
 2. SecurityResourceServerConfig class
 
-    Token Validation happens in this class, where the auth token is validated and an access token is obtained  which is used to obtain obo     token to complete the obo flow.
+    Token Validation happens in this class, where the auth token is validated and an access token is obtained which is used to obtain obo token to complete the obo flow.
 
     ```java
             http

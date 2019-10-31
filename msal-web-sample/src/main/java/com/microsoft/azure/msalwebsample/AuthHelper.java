@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -20,6 +21,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,6 +39,9 @@ class AuthHelper {
 
     @Autowired
     BasicConfiguration configuration;
+
+    @Value("${aad.webapp.defaultScope}")
+    private String WEBAPI_DEFAULT_SCOPE;
 
     @PostConstruct
     public void init() {
@@ -99,8 +104,9 @@ class AuthHelper {
             String authCode = authorizationCode.getValue();
             AuthorizationCodeParameters parameters = AuthorizationCodeParameters.builder(
                     authCode,
-                    new URI(currentUri)).
-                    build();
+                    new URI(currentUri))
+                    .scopes(Collections.singleton(WEBAPI_DEFAULT_SCOPE))
+                    .build();
 
             Future<IAuthenticationResult> future = app.acquireToken(parameters);
 

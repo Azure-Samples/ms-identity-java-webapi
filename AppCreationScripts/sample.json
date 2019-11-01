@@ -1,7 +1,7 @@
 {
   "Sample": {
     "RepositoryUrl": "ms-identity-java-webapi",
-    "Title": "Integrating Azure AD into a Java web api application",
+    "Title": "This sample demonstrates a Java web app application calling a Java Web API that is secured using Azure Active Directory using the On-Behalf-Of flow",
     "Client": "Java web app",
     "Level": 300,
     "Service": "Java Web API",
@@ -10,7 +10,7 @@
   "AADApps": [
     {
       "Id": "service",
-      "Name": "java_obo",
+      "Name": "java_webapi",
       "Kind": "WebApi",
       "PasswordCredentials": "Auto",
       "Homepage":"https://localhost:8081",
@@ -24,8 +24,8 @@
     {
       "Id": "client",
       "Name": "java_webapp",
-      "Kind": "WebApp", /* SinglePageApplication, WebApp, Mobile, UWP, Desktop, Daemon, WebApi, Browserless */
-      "Audience": "AzureADandPersonalMicrosoftAccount", /* AzureADMyOrg, AzureADMultipleOrgs, AzureADandPersonalMicrosoftAccount, PersonalMicrosoftAccount */
+      "Kind": "WebApp",
+      "Audience": "AzureADandPersonalMicrosoftAccount",
       "PasswordCredentials": "Auto",
       "Homepage":"https://localhost:8080",
       "RequiredResourcesAccess": [
@@ -34,8 +34,8 @@
           "DelegatedPermissions": ["access_as_user"]
         }
       ],
-      "ReplyUrls": "https://localhost:8080/msal4jsample/secure/aad",
-      "LogoutUrl": "https://localhost:8080/msal4jsample/sign-out"
+      "ReplyUrls": "http://localhost:8080/msal4jsample/secure/aad,http://localhost:8080/msal4jsample/graph/me",
+      "LogoutUrl": "http://localhost:8080/msal4jsample/sign-out"
     }
   ],
   "CodeConfiguration": [

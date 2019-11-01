@@ -1,35 +1,42 @@
 ---
+services: active-directory
+platforms: java
+author: ramya25
+level: 300
+client: Java web app
+service: Java Web API
+endpoint: Microsoft identity platform
 page_type: sample
 languages:
-- java
+  - java  
 products:
   - azure
   - azure-active-directory
   - java
-description: "This sample demonstrates calling a downstream web API from another web API in Microsoft identity platform using the On-Behalf-Of flow"
-urlFragment: ms-identity-java-webapi
+  - office-ms-graph
+description: "This sample demonstrates a Java web app application calling a Java Web API that is secured using Azure Active Directory using the On-Behalf-Of flow"
 ---
-
 # A Java Web API that calls another web API with the Microsoft identity platform using the On-Behalf-Of flow
 
 ## About this sample
 
 ### Overview
 
-This sample demonstrates a Java web application calling a downstream Web API, [Microsoft Graph](https://graph.microsoft.com) using the [On-Behalf-Of](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow) flow. All these are secured using the Microsoft identity platform.
+This sample demonstrates a Java web application calling a downstream Web API, which in turn calls the [Microsoft Graph](https://graph.microsoft.com) using an [access token](https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens) obtained using the [on-behalf-of](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow) flow. All these are secured using the [Microsoft identity platform (formerly Azure Active Directory for developers)](https://docs.microsoft.com/en-us/azure/active-directory/develop/).
 
 1. The Java web application uses the [Microsoft Authentication Library for Java (MSAL4J)](https://github.com/AzureAD/microsoft-authentication-library-for-java) to obtain an Access token the Microsoft identity platform for the authenticated user.
-2. The access token is used as a bearer token to authenticate the user when calling the Java Web API and then the Microsoft Graph API.
+2. The access token is then used as a bearer token to authorize the caller in the ASP.NET Web API and then subsequently for Microsoft Graph API.
 
 The flow is as follows:
 
 1. Sign-in the user in the client(web) application.
-1. Acquire a token for the Java Web API and call it.
-1. The Java Web API then calls the Microsoft Graph using another access token obtained using the on-behalf-of flow.
+1. Acquire an access token token for the Java Web API and call it.
+1. The Java Web API authorizes the caller and then calls another downstream Web API ([The Microsoft Graph](https://graph.microsoft.com)) after obtaining another [access token](https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens) using the on-behalf-of flow.
 
 ### Scenario
 
-This sample shows how to build a Java web app that uses OpenId Connect to sign in/ sign out an user and to get access to the Microsoft Graph using MSAL4J. And also shows how to use On-Behalf-Of flow to call an API with another service. For more information about how the protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-scenarios),[Microsoft identity platform and OAuth 2.0 On-Behalf-Of flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow).
+This sample shows how to build a Java web app that uses the [OpenId Connect](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols) protocol to sign in and sign out an user and to get an access token for another Web API including for the Microsoft Graph using the MSAL4J library. It also shows how to use On-Behalf-Of flow to acquire another access token from a Wen API to call another API.
+For more information about how the protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-scenarios),[Microsoft identity platform and OAuth 2.0 On-Behalf-Of flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow).
 
 ## How to run this sample
 
@@ -48,7 +55,9 @@ To successfully use this sample, you need a working installation of [Java](https
 
 From your shell or command line:
 
-- `git clone https://github.com/Azure-Samples/ms-identity-java-webapi.git`
+```Shell
+git clone https://github.com/Azure-Samples/ms-identity-java-webapi.git
+```
 
 ### Step 3:  Register the sample with your Azure Active Directory tenant
 
@@ -58,39 +67,49 @@ There are two projects in this sample. Each needs to be registered separately in
 
 As a first step you'll need to:
 
-1. Sign in to the [Azure portal](https://portal.azure.com).
-1. On the top bar, click on your account, and then on **Switch Directory**.
-1. Once the *Directory + subscription* pane opens, choose the Active Directory tenant where you wish to register your application, from the *Favorites* or *All Directories* list.
+1. Sign in to the [Azure portal](https://portal.azure.com) using either a work or school account or a personal Microsoft account.
+1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory**.
+   Change your portal session to the desired Azure AD tenant.
 1. In the portal menu click on **All services** and choose **Azure Active Directory**.
 
 > In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
 
 #### Register the Web Api app (java-webapi)
 
-1. In the  **Azure Active Directory** menu blade, select **App registrations** and choose **New registration**.
-1. Enter a friendly name for the application, for example 'java-webapi' and select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
-1. Click **Register** to register the application.
-1. On the app **Overview** page:
-    - copy **Application (client) ID**
-    - copy **Directory (tenant) ID**
-    - You'll need both of these values later to configure the project, so save them in a safe place.
-
-1. In the Application menu blade, select **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
-
-   - Type a key description (for instance `app secret`).
-   - Select one of the provided key durations as per your security needs.
-   - Key value will be displayed when you click **Add**. Copy the value and save for later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
-
-1. In the Application menu blade, select **Expose an API**, click on **Add a scope**
-    - Accept the proposed **Application ID URI** (api://{clientId}) by selecting **save and continue**.
-    - For **scope name** use **access_as_user**
-    - Select **Admins and users** for **who can consent**.
-    - In **Admin consent display name** type `Access Webapi as a user`
-    - In **Admin consent description** type `Allow the application to access Webapi on behalf of the signed-in user.`
-    - In **User consent display name** type `Access Webapi as a user`
-    - In **User consent description** type `Allow the application to access Webapi on your behalf.`
-    - Keep **State** as **Enabled**
-    - Click **Add scope**.
+1. Navigate to the Microsoft identity platform for developers [App registrations](https://go.microsoft.com/fwlink/?linkid=2083908) page.
+1. Click **New registration** on top.
+1. In the **Register an application page** that appears, enter your application's registration information:
+   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `java-webapi`.
+   - Change **Supported account types** to **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
+1. Click on the **Register** button in bottom to create the application.
+1. In the app's registration screen, find the **Application (client) ID** and **Directory (tenant) ID** value and record it for use later. You'll need it to configure the configuration file(s) later in your code.
+1. Click the **Save** button on top to save the changes.
+1. In the app's registration screen, click on the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
+1. In the **Client secrets** section, click on **New client secret**:
+   - Type a key description (for instance `app secret`),
+   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security concerns.
+   - The generated key value will be displayed when you click the **Add** button. Copy the generated value for use in the steps later.
+   - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the Apis that your application needs.
+   - Click the **Add a permission** button and then,
+   - Ensure that the **Microsoft APIs** tab is selected.
+   - In the *Commonly used Microsoft APIs* section, click on **Microsoft Graph**
+   - In the **Delegated permissions** section, select the **User.Read** in the list. Use the search box if necessary.
+   - Click on the **Add permissions** button in the bottom.
+1. In the app's registration screen, click on the **Expose an API** blade in the left to open the page where declare the parameters to expose this app as an Api for which client applications can obtain [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for.
+The first thing that we need to do is to declare the unique [resource](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow) URI that the clients will be using to obtain access tokens for this Api. To declare an resource URI, follow the following steps:
+   - Click `Set` next to the **Application ID URI** to generate a URI thats unique for this app.
+   - For this sample, accept the proposed Application ID URI (api://{clientId}) by selecting **Save**.
+1. All Apis have to publish a minimum of one [scope](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow#request-an-authorization-code) for the client's to obtain an access token successfully. To publish a scope, follow the following steps:
+   - Select **Add a scope** button open the **Add a scope** screen and Enter the values as indicated below:
+          - For **Scope name**, use `access_as_user`.
+          - Select **Admins and users** options for **Who can consent?**
+          - For **Admin consent display name** type `Access java-webapi`
+          - For **Admin consent description** type `Allows the app to access java-webapi as the signed-in user.`
+          - For **User consent display name** type `Access java-webapi`
+          - For **User consent description** type `Allow the application to access java-webapi on your behalf.`
+          - Keep **State** as **Enabled**
+          - Click on the **Add scope** button on the bottom to save this scope.
 
 #### Configure the **msal-obo-sample** to use your Azure AD tenant
 
@@ -100,36 +119,38 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 - *Enter_the_Application_Id_here* with the **Application (client) ID**.
 - *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
 
-#### Register the client Web app (java-webapp)
+#### Register the client web app (java_webapp)
 
-1. In the **Azure Active Directory** menu blade, select **App registrations** and choose **New registration**.
-1. Enter a friendly name for the application, for example 'java-webapp', select **Accounts in any organizational directory and personal Microsoft Accounts (e.g. Skype, Xbox, Outlook.com)**.
-1. Click **Register** to register the application.
-1. On the **Overview** page:
-    - copy **Application (client) ID**
-    - copy **Directory (tenant) ID**
-    - You'll need both of these values later to configure the projects
-1. In the Application menu blade, select the **Authentication** and under *Redirect URIs*, select **Web**.
-    You will need to enter two different redirect URIs: one for the sign-In page, and one for the page that calls Graph. For both, you should use the same host and port number, then followed by */msal4jsample/secure/aad* for the sign in page and */msal4jsample/graph/me* for the user info page.
-    To run this sample, enter the following two urls:
+1. Navigate to the Microsoft identity platform for developers [App registrations](https://go.microsoft.com/fwlink/?linkid=2083908) page.
+1. Click **New registration** on top.
+1. In the **Register an application page** that appears, enter your application's registration information:
+   - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `java_webapp`.
+   - Change **Supported account types** to **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
+     > Note that there are more than one redirect URIs used in this sample. You'll need to add them from the **Authentication** tab later after the app has been created successfully.
+1. Click on the **Register** button in bottom to create the application.
+1. In the app's registration screen, find the **Application (client) ID** value and record it for use later. You'll need it to configure the configuration file(s) later in your code.
+1. In the app's registration screen, click on the **Authentication** blade in the left.
+   - In the Redirect URIs section, select **Web** in the drop down and enter the following redirect URIs.
+       - `http://localhost:8080/msal4jsample/secure/aad`
+       - `http://localhost:8080/msal4jsample/graph/me`
+   - In the **Advanced settings** section, set **Logout URL** to `https://localhost:8080/msal4jsample/sign-out`.
+   - In the **Advanced settings** | **Implicit grant** section, check the **ID tokens** option as this sample requires
+     the [Implicit grant flow](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-implicit-grant-flow) to be enabled to
+     sign-in the user, and call an API.
 
-    - `http://localhost:8080/msal4jsample/secure/aad`.
-    - `http://localhost:8080/msal4jsample/graph/me`
-
-Click **save**.
-
-1. In the Application menu blade, select **Certificates & Secrets** and click on `New client secret` in the **Client Secrets** section:
-
+1. Click the **Save** button on top to save the changes.
+1. In the app's registration screen, click on the **Certificates & secrets** blade in the left to open the page where we can generate secrets and upload certificates.
+1. In the **Client secrets** section, click on **New client secret**:
    - Type a key description (for instance `app secret`),
-   - Select one of the provided key durations as per your security needs.
-   - When you save this page, the key value will be displayed. Copy and save the value in a safe location. You'll need this key later to configure the project. This key value will not be displayed again, nor retrievable by any other means, so record it as soon as it is visible in the Azure portal.
-
-1. In the Application menu blade, select **API Permissions**:
-   - Click the **Add a permission** button,
-   - Select the **My APIs** tab,
-   - In the list of APIs, select the API `Web Api app`,
-   - In the **Delegated permissions** section, ensure that the right permissions are checked: **access_as_user**,
-   - Select the **Add permissions** button.
+   - Select one of the available key durations (**In 1 year**, **In 2 years**, or **Never Expires**) as per your security concerns.
+   - The generated key value will be displayed when you click the **Add** button. Copy the generated value for use in the steps later.
+   - You'll need this key later in your code's configuration files. This key value will not be displayed again, and is not retrievable by any other means, so make sure to note it from the Azure portal before navigating to any other screen or blade.
+1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the Apis that your application needs.
+   - Click the **Add a permission** button and then,
+   - Ensure that the **My APIs** tab is selected.
+   - In the list of APIs, select the API `java-webapi`.
+   - In the **Delegated permissions** section, select the **access_as_user** in the list. Use the search box if necessary.
+   - Click on the **Add permissions** button in the bottom.
 
 #### Configure the **msal-web-sample** to use your Azure AD tenant
 
@@ -141,10 +162,11 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 
 #### Configure known client applications for service (java-webapi)
 
-For the middle tier web API (`java-webapi`) to be able to call the downstream web APIs, the user must grant the middle tier permission to do so in the form of consent.
-However, since the middle tier has no interactive UI of its own, you need to explicitly bind the client app registration in Azure AD, with the registration for the web API.
-This binding merges the consent required by both the client and middle tier into a single dialog, which will be presented to the user by the client for the first time when the user signs-in.
-You can do so by adding the "Client ID" of the client app, to the manifest of the web API in the `knownClientApplications` property. Here's how:
+For a middle tier web API (`java-webapi`) to be able to call a downstream web API, the middle tier app needs to be granted the required permissions as well.
+However, since the middle tier cannot interact with the signed-in user, it needs to be explicitly bound to the client app in its Azure AD registration.
+This binding merges the permissions required by both the client and the middle tier WebApi and and presents it to the end user in a single consent dialog. The user than then consent to this combined set of permissions.
+
+To achieve this, you need to add the "Client ID" of the client app, in the manifest of the web API in the `knownClientApplications` property. Here's how:
 
 In the [Azure portal](https://portal.azure.com), navigate to your `java-webapi` app registration:
 
@@ -244,11 +266,11 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
 
 ### msal-webapp-sample
 
-1. AuthPageController class
+1. **AuthPageController** class
 
-    Contains the api to interact with the web app. The securePage method handles the authentication part and signs in the user using microsoft authentication.
+    Contains the api to interact with the web app. The `securePage` method handles the authentication part and signs in the user using microsoft authentication.
 
-2. AuthHelper class
+2. **AuthHelper** class
 
     Contains helper methods to handle authentication.
 
@@ -278,15 +300,15 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
     - We create a `ConfidentialClientApplication` using **MSAL Build Pattern** passing the `clientId`, `clientSecret` and `authority` in the builder. This `ConfidentialClientApplication` will be responsible of acquiring access tokens later in the code.
     - `ConfidentialClientApplication` also has a token cache, that will cache [access tokens](https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens) and [refresh tokens](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow#refresh-the-access-token) for the signed-in user. This is done so that the application can fetch access tokens after they have expired without prompting the user to sign-in again.
 
-3. AuthFilter class
+3. **AuthFilter** class
 
     Contains methods for session and state management.
 
 ### msal-obo-sample
 
-1. ApiController class
+1. **ApiController** class
 
-    Contains the api(graphMeApi) to trigger the obo flow. The graphMeApi method gets the obo access token using MsalAuthHelper. The callMicrosoftGraphEndPoint method calls the Microsoft graph API using obo token.
+    Contains the api(graphMeApi) to trigger the obo flow. The graphMeApi method gets the obo access token using **MsalAuthHelper**. The `callMicrosoftGraphEndPoint` method calls the Microsoft graph API using obo token.
 
     ```java
     String oboAccessToken = msalAuthHelper.getOboToken("https://graph.microsoft.com/.default");
@@ -296,15 +318,15 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
 
     Important things to notice:
 
-    - The scope [.default](https://docs.microsoft.com/en-us/azure/active-directory/developv2-permissions-and-consent#the-default-scope) is a built-in scope for every application that refers to the static list of permissions configured on the application registration. In our scenario here, it enables the user to grant consent for permissions for both the Web API and the downstream API (Microsoft Graph). For example, the permissions for the Web API and the downstream API (Microsoft Graph) are listed below:
+    - The **scope** [.default](https://docs.microsoft.com/en-us/azure/active-directory/developv2-permissions-and-consent#the-default-scope) is a built-in scope for every application that refers to the static list of permissions configured on the application registration. In our scenario here, it enables the user to grant consent for permissions for both the Web API and the downstream API (Microsoft Graph). For example, the permissions for the Web API and the downstream API (Microsoft Graph) are listed below:
              - Web Api sample (access_as_user)
              - Microsoft Graph (user.read)
 
     - When you use the `.default` scope, the end user is prompted for a combined set of permissions that include scopes from both the **Web Api** and **Microsoft Graph**.
 
-2. SecurityResourceServerConfig class
+2. **SecurityResourceServerConfig** class
 
-    Token Validation happens in this class, where the auth token is validated and an access token is obtained which is used to obtain obo token to complete the obo flow.
+    Token Validation of the caller happens in this class, where the access token presented by the client app is validated and another access token is obtained using the on-behalf-of flow
 
     ```java
             http
@@ -315,7 +337,7 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
             .access("#oauth2.hasScope('" + accessAsUserScope + "')"); // required scope to access /api URL
     ```
 
-3. MsalAuthHelper class
+3. **MsalAuthHelper** class
 
     Contains the methods to obtain the auth token and obo token to enable on-behalf-of flow.
 

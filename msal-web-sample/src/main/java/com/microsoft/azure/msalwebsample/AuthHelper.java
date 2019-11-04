@@ -40,9 +40,6 @@ class AuthHelper {
     @Autowired
     BasicConfiguration configuration;
 
-    @Value("${aad.webapp.defaultScope}")
-    private String WEBAPI_DEFAULT_SCOPE;
-
     @PostConstruct
     public void init() {
         clientId = configuration.getClientId();
@@ -105,7 +102,6 @@ class AuthHelper {
             AuthorizationCodeParameters parameters = AuthorizationCodeParameters.builder(
                     authCode,
                     new URI(currentUri))
-                    .scopes(Collections.singleton(WEBAPI_DEFAULT_SCOPE))
                     .build();
 
             Future<IAuthenticationResult> future = app.acquireToken(parameters);

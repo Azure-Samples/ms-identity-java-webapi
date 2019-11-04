@@ -5,17 +5,14 @@ package com.microsoft.azure.msalwebsample;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.*;
 
-import javax.naming.ServiceUnavailableException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -25,13 +22,13 @@ import javax.servlet.http.HttpSession;
 
 import com.microsoft.aad.msal4j.*;
 import com.nimbusds.jwt.JWTParser;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,6 +38,9 @@ public class AuthFilter implements Filter {
     private static final String STATE = "state";
     private static final Integer STATE_TTL = 3600;
     private static final String FAILED_TO_VALIDATE_MESSAGE = "Failed to validate data received from Authorization service - ";
+
+    @Value("${aad.webapp.defaultScope}")
+    private String WEBAPI_DEFAULT_SCOPE;
 
     private List<String> excludedUrls = Arrays.asList("/", "/msal4jsample/");
 
@@ -212,7 +212,7 @@ public class AuthFilter implements Filter {
                 "response_mode=form_post&" +
                 "redirect_uri=" + URLEncoder.encode(authHelper.getRedirectUri(), "UTF-8") +
                 "&client_id=" + authHelper.getClientId() +
-                "&scope=" + URLEncoder.encode("openid offline_access profile", "UTF-8") +
+                "&scope=" + URLEncoder.encode("openid offline_access profile "+ WEBAPI_DEFAULT_SCOPE, "UTF-8") +
                 (StringUtils.isEmpty(claims) ? "" : "&claims=" + claims) +
                 "&prompt=select_account" +
                 "&state=" + state

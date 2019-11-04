@@ -134,9 +134,6 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
        - `http://localhost:8080/msal4jsample/secure/aad`
        - `http://localhost:8080/msal4jsample/graph/me`
    - In the **Advanced settings** section, set **Logout URL** to `https://localhost:8080/msal4jsample/sign-out`.
-   - In the **Advanced settings** | **Implicit grant** section, check the **ID tokens** option as this sample requires
-     the [Implicit grant flow](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-implicit-grant-flow) to be enabled to
-     sign-in the user, and call an API.
 
 1. Click the **Save** button on top to save the changes.
 1. In the app's registration screen, click on the **Certificates & secrets** blade to open the page where we can generate secrets and upload certificates.

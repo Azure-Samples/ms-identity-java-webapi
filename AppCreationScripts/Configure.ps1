@@ -217,14 +217,14 @@ Function ConfigureApplications
     $user = Get-AzureADUser -ObjectId $creds.Account.Id
 
    # Create the service AAD application
-   Write-Host "Creating the AAD application (java_obo)"
+   Write-Host "Creating the AAD application (java_webapi)"
    # Get a 2 years application key for the service Application
    $pw = ComputePassword
    $fromDate = [DateTime]::Now;
    $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
    $serviceAppKey = $pw
    # create the application 
-   $serviceAadApplication = New-AzureADApplication -DisplayName "java_obo" `
+   $serviceAadApplication = New-AzureADApplication -DisplayName "java_webapi" `
                                                    -HomePage "https://localhost:8081" `
                                                    -AvailableToOtherTenants $True `
                                                    -PasswordCredentials $key `
@@ -262,9 +262,9 @@ Function ConfigureApplications
         {
             # Add scope
             $scope = CreateScope -value "access_as_user"  `
-                -userConsentDisplayName "Access java_obo"  `
-                -userConsentDescription "Allow the application to access java_obo on your behalf."  `
-                -adminConsentDisplayName "Access java_obo"  `
+                -userConsentDisplayName "Access java_webapi"  `
+                -userConsentDescription "Allow the application to access java_webapi on your behalf."  `
+                -adminConsentDisplayName "Access java_webapi"  `
                 -adminConsentDescription "Allows the app to have the same access to information in the directory on behalf of the signed-in user."
             
             $scopes.Add($scope)
@@ -274,12 +274,12 @@ Function ConfigureApplications
     # add/update scopes
     Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -OAuth2Permission $scopes
 
-   Write-Host "Done creating the service application (java_obo)"
+   Write-Host "Done creating the service application (java_webapi)"
 
    # URL of the AAD application in the Azure portal
    # Future? $servicePortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
    $servicePortalUrl = "https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId+"/isMSAApp/"
-   Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>java_obo</a></td></tr>" -Path createdApps.html
+   Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>java_webapi</a></td></tr>" -Path createdApps.html
 
    $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
 
@@ -304,8 +304,8 @@ Function ConfigureApplications
    # create the application 
    $clientAadApplication = New-AzureADApplication -DisplayName "java_webapp" `
                                                   -HomePage "https://localhost:8080" `
-                                                  -LogoutUrl "https://localhost:8080/msal4jsample/sign-out" `
-                                                  -ReplyUrls "https://localhost:8080/msal4jsample/secure/aad" `
+                                                  -LogoutUrl "http://localhost:8080/msal4jsample/sign-out" `
+                                                  -ReplyUrls "http://localhost:8080/msal4jsample/secure/aad", "http://localhost:8080/msal4jsample/graph/me" `
                                                   -IdentifierUris "https://$tenantName/java_webapp" `
                                                   -AvailableToOtherTenants $True `
                                                   -PasswordCredentials $key `
@@ -336,7 +336,7 @@ Function ConfigureApplications
 
    # Add Required Resources Access (from 'client' to 'service')
    Write-Host "Getting access from 'client' to 'service'"
-   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "java_obo" `
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "java_webapi" `
                                                 -requiredDelegatedPermissions "access_as_user" `
 
    $requiredResourcesAccess.Add($requiredPermissions)
@@ -353,7 +353,11 @@ Function ConfigureApplications
    Write-Host "Configured."
 
 
-
+   # Update config file for 'client'
+   $configFile = $pwd.Path + "\..\Client\appsettings.json"
+   Write-Host "Updating the sample code ($configFile)"
+   $dictionary = @{ "Domain" = $tenantName };
+   UpdateTextFile -configFilePath $configFile -dictionary $dictionary
   
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }

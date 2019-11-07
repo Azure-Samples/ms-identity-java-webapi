@@ -24,26 +24,22 @@ description: "This sample demonstrates a Java web app application calling a Java
 
 This sample demonstrates a Java web application calling a downstream Web API, which in turn calls the [Microsoft Graph](https://graph.microsoft.com) using an [access token](https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens) obtained using the [on-behalf-of](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow) flow. All these are secured using the [Microsoft identity platform (formerly Azure Active Directory for developers)](https://docs.microsoft.com/en-us/azure/active-directory/develop/).
 
-1. The Java web application uses the [Microsoft Authentication Library for Java (MSAL4J)](https://github.com/AzureAD/microsoft-authentication-library-for-java) to obtain an Access token the Microsoft identity platform for the authenticated user.
-2. The access token is then used as a bearer token to authorize the caller in the Java Web API and then subsequently for Microsoft Graph API.
+### Scenario
+
+1. The Java web application uses the [Microsoft Authentication Library for Java (MSAL4J)](https://github.com/AzureAD/microsoft-authentication-library-for-java) to obtain an Access token from the Microsoft identity platform for the authenticated user.
+1. The access token is then used as a bearer token to authorize the caller in the Java web API and then subsequently exchanged for another access token for the Microsoft Graph API.
 
 The flow is as follows:
 
 1. Sign-in the user in the client(web) application.
-1. Acquire an access token token for the Java Web API and call it.
+1. Acquire an access token for the Java Web API and call it.
 1. The Java Web API authorizes the caller and then calls another downstream Web API ([The Microsoft Graph](https://graph.microsoft.com)) after obtaining another [access token](https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens) using the on-behalf-of flow.
-
-### Scenario
-
-This sample shows how to build a Java web app that uses the [OpenId Connect](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols) protocol to sign in and sign out an user and to get an access token for another Web API including for the Microsoft Graph using the MSAL4J library. It also shows how to use On-Behalf-Of flow to acquire another access token from a Wen API to call another API.
-For more information about how the protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-authentication-scenarios),[Microsoft identity platform and OAuth 2.0 On-Behalf-Of flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow).
 
 ## How to run this sample
 
 To run this sample, you'll need:
 
 - Working installation of Java and Maven
-- An Internet connection
 - An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/)
 - A user account in your Azure AD tenant.
 
@@ -322,7 +318,7 @@ There are many key points in this sample to make the On-Behalf-Of-(OBO) flow wor
 
 2. **SecurityResourceServerConfig** class
 
-    Token Validation of the caller happens in this class, where the access token presented by the client app is validated and another access token is obtained using the on-behalf-of flow
+    Token Validation of the caller happens in this class, where the access token presented by the client app is validated using Spring Security and another access token is obtained using the on-behalf-of flow
 
     ```Java
             http

@@ -41,7 +41,7 @@ To run this sample, you'll need:
 
 - Working installation of Java and Maven
 - An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/)
-- A user account in your Azure AD tenant.
+- An user account in your Azure AD tenant.
 
 ### Step 1: Download Java (8 and above) for your platform
 
@@ -66,7 +66,7 @@ As a first step you'll need to:
 1. Sign in to the [Azure portal](https://portal.azure.com) using either a work or school account or a personal Microsoft account.
 1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory**.
    Change your portal session to the desired Azure AD tenant.
-1. In the portal menu, click on **All services** and choose **Azure Active Directory**.
+1. In the portal menu, select the **Azure Active Directory** service, and then select **App registrations**.
 
 > In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
 
@@ -78,7 +78,7 @@ As a first step you'll need to:
    - In the **Name** section, enter a meaningful application name that will be displayed to users of the app, for example `Java-webapi`.
    - Change **Supported account types** to **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click on the **Register** button to create the application.
-1. In the app's registration **Overview** page, find the **Application (client) ID** and **Directory (tenant) ID** value and record it for use later. You'll need it to configure the configuration file(s) later in your code.
+1. In the app's registration **Overview** page, find the **Application (client) ID** and **Directory (tenant) ID** values and record it for use later. You'll need them to configure the configuration file(s) later in your code.
 1. Click the **Save** button to save the changes.
 1. In the Application menu blade, click on the **Certificates & secrets** to open the page where we can generate secrets and upload certificates.
 1. In the **Client secrets** section, click on **New client secret**:
@@ -365,7 +365,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 - For more information, see MSAL4J [conceptual documentation](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki)
 - Other samples for Microsoft identity platform are available from [https://aka.ms/aaddevsamplesv2](https://aka.ms/aaddevsamplesv2)
 - [Microsoft identity platform and OAuth 2.0 On-Behalf-Of flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow)
-- the documentation for Microsoft identity platform is available from [https://aka.ms/aadv2](https://aka.ms/aadv2)
+- The documentation for Microsoft identity platform is available from [https://aka.ms/aadv2](https://aka.ms/aadv2)
 - For more information about web apps scenarios on the Microsoft identity platform see [Scenario: Web app that signs in users](https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-sign-user-overview) and [Scenario: Web app that calls web APIs](https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-overview)
 - [Why update to Microsoft identity platform?](https://docs.microsoft.com/en-us/azure/active-directory/develop/azure-ad-endpoint-comparison)
-For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
+- For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).

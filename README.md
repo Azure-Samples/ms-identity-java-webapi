@@ -152,6 +152,17 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 - Replace *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
 - Replace *OboApi* with the API exposed in the `Web Api app` **(api://{clientId})**.
 
+In order to use https with localhost fill in server.ssl.key properties.  
+Use keytool utility (included in JRE) if you want to generate self-signed certificate.
+
+Example:  
+keytool -genkeypair -alias testCert -keyalg RSA -storetype PKCS12 -keystore keystore.p12 -storepass password
+
+server.ssl.key-store-type=PKCS12  
+server.ssl.key-store=classpath:keystore.p12  
+server.ssl.key-store-password=password  
+server.ssl.key-alias=testCert 
+
 #### Configure known client applications for service (Java-webapi)
 
 For a middle tier web API (`Java-webapi`) to be able to call a downstream web API, the middle tier app needs to be granted the required permissions as well.

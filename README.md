@@ -79,7 +79,6 @@ As a first step you'll need to:
    - Change **Supported account types** to **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click on the **Register** button to create the application.
 1. In the app's registration **Overview** page, find the **Application (client) ID** and **Directory (tenant) ID** values and record it for use later. You'll need them to configure the configuration file(s) later in your code.
-1. Click the **Save** button to save the changes.
 1. In the Application menu blade, click on the **Certificates & secrets** to open the page where we can generate secrets and upload certificates.
 1. In the **Client secrets** section, click on **New client secret**:
    - Type a key description (for instance `app secret`),
@@ -128,9 +127,9 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 1. In the app's registration **Overview** page, find the **Application (client) ID** value and record it for later. You'll need it to configure the configuration file(s) later in your code.
 1. In the app's registration screen, click on the **Authentication** blade in the left and:
    - In the **Platform configurations** section select **Add a platform** and create a new **Web** application
-   - Enter the following as the redirect URI: `http://localhost:8080/msal4jsample/secure/aad`
+   - Enter the following as the redirect URI: `https://localhost:8080/msal4jsample/secure/aad`
    - Click on **Configure** to save your changes.
-   - Do the same for: `http://localhost:8080/msal4jsample/graph/me`
+   - Do the same for: `https://localhost:8080/msal4jsample/graph/me`
    - Click the **Save** button to save the the redirect URI changes.
 1. In the Application menu blade, click on the **Certificates & secrets** to open the page where we can generate secrets and upload certificates.
 1. In the **Client secrets** section, click on **New client secret**:
@@ -200,7 +199,7 @@ The following steps are for IntelliJ IDEA. But you can choose and work with any 
 8. Click on '+' and select the application names you have created in the above steps one at a time.
 9. Click on *Apply*. Select the created configuration and click **Run**. Now both the projects will run at a time.
 
-- Now navigate to the home page of the project. For this sample, the standard home page URL is <http://localhost:8080>
+- Now navigate to the home page of the project. For this sample, the standard home page URL is <https://localhost:8080/msal4jsample>
 
 #### Packaging and deploying to container
 

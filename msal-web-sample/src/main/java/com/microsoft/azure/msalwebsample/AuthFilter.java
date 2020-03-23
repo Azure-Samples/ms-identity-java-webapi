@@ -34,7 +34,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthFilter implements Filter {
 
+    private static final String STATES = "states";
     private static final String STATE = "state";
+    private static final Integer STATE_TTL = 3600;
     private static final String FAILED_TO_VALIDATE_MESSAGE = "Failed to validate data received from Authorization service - ";
 
     @Value("${aad.webapp.defaultScope}")
@@ -58,17 +60,15 @@ public class AuthFilter implements Filter {
                 String fullUrl = currentUri + (queryStr != null ? "?" + queryStr : "");
 
                 // exclude home page
-                if(excludedUrls.contains(path)){
+                if (excludedUrls.contains(path)) {
                     chain.doFilter(request, response);
                     return;
                 }
                 // check if user has a AuthData in the session
                 if (!AuthHelper.isAuthenticated(httpRequest)) {
-                    if(AuthHelper.containsAuthenticationCode(httpRequest)){
+                    if (AuthHelper.containsAuthenticationCode(httpRequest)) {
                         // response should have authentication code, which will be used to acquire access token
                         processAuthenticationCodeRedirect(httpRequest, currentUri, fullUrl);
-
-                        CookieHelper.removeStateNonceCookies(httpResponse);
                     } else {
                         // not authenticated, redirecting to login.microsoft.com so user can authenticate
                         sendAuthRedirect(httpRequest, httpResponse);
@@ -107,7 +107,7 @@ public class AuthFilter implements Filter {
             params.put(key, Collections.singletonList(httpRequest.getParameterMap().get(key)[0]));
         }
         // validate that state in response equals to state in request
-        validateState(CookieHelper.getCookie(httpRequest, CookieHelper.MSAL_WEB_APP_STATE_COOKIE), params.get(STATE).get(0));
+        StateData stateData = validateState(httpRequest.getSession(), params.get(STATE).get(0));
 
         AuthenticationResponse authResponse = AuthenticationResponseParser.parse(new URI(fullUrl), params);
         if (AuthHelper.isAuthenticationSuccessful(authResponse)) {
@@ -121,8 +121,7 @@ public class AuthFilter implements Filter {
                     currentUri);
 
             // validate nonce to prevent reply attacks (code maybe substituted to one with broader access)
-            validateNonce(CookieHelper.getCookie(httpRequest, CookieHelper.MSAL_WEB_APP_NONCE_COOKIE),
-                    getNonceClaimValueFromIdToken(result.idToken()));
+            validateNonce(stateData, getNonceClaimValueFromIdToken(result.idToken()));
 
             authHelper.setSessionPrincipal(httpRequest, result);
         } else {
@@ -138,27 +137,31 @@ public class AuthFilter implements Filter {
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
-        CookieHelper.setStateNonceCookies(httpRequest, httpResponse, state, nonce);
+        storeStateInSession(httpRequest.getSession(), state, nonce);
 
         httpResponse.setStatus(302);
         String redirectUrl = getRedirectUrl(httpRequest.getParameter("claims"), state, nonce);
         httpResponse.sendRedirect(redirectUrl);
     }
 
-    private void validateState(String cookieValue, String state) throws Exception {
-        if (StringUtils.isEmpty(state) || !state.equals(cookieValue)) {
-            throw new Exception(FAILED_TO_VALIDATE_MESSAGE + "could not validate state");
-        }
-    }
-
-    private void validateNonce(String cookieValue, String nonce) throws Exception {
-        if (StringUtils.isEmpty(nonce) || !nonce.equals(cookieValue)) {
+    private void validateNonce(StateData stateData, String nonce) throws Exception {
+        if (StringUtils.isEmpty(nonce) || !nonce.equals(stateData.getNonce())) {
             throw new Exception(FAILED_TO_VALIDATE_MESSAGE + "could not validate nonce");
         }
     }
 
     private String getNonceClaimValueFromIdToken(String idToken) throws ParseException {
         return (String) JWTParser.parse(idToken).getJWTClaimsSet().getClaim("nonce");
+    }
+
+    private StateData validateState(HttpSession session, String state) throws Exception {
+        if (StringUtils.isNotEmpty(state)) {
+            StateData stateDataInSession = removeStateFromSession(session, state);
+            if (stateDataInSession != null) {
+                return stateDataInSession;
+            }
+        }
+        throw new Exception(FAILED_TO_VALIDATE_MESSAGE + "could not validate state");
     }
 
     private void validateAuthRespMatchesAuthCodeFlow(AuthenticationSuccessResponse oidcResponse) throws Exception {
@@ -168,20 +171,55 @@ public class AuthFilter implements Filter {
         }
     }
 
-    private String getRedirectUrl(String claims, String state, String nonce)
-            throws UnsupportedEncodingException {
+    private void storeStateInSession(HttpSession session, String state, String nonce) {
+        if (session.getAttribute(STATES) == null) {
+            session.setAttribute(STATES, new HashMap<String, StateData>());
+        }
+        ((Map<String, StateData>) session.getAttribute(STATES)).put(state, new StateData(nonce, new Date()));
+    }
 
-        String redirectUrl = authHelper.getAuthority() + "oauth2/v2.0/authorize?" +
-                "response_type=code&" +
-                "response_mode=form_post&" +
-                "redirect_uri=" + URLEncoder.encode(authHelper.getRedirectUri(), "UTF-8") +
-                "&client_id=" + authHelper.getClientId() +
-                "&scope=" + URLEncoder.encode("openid offline_access profile "+ WEBAPI_DEFAULT_SCOPE, "UTF-8") +
-                (StringUtils.isEmpty(claims) ? "" : "&claims=" + claims) +
-                "&prompt=select_account" +
-                "&state=" + state
-                + "&nonce=" + nonce;
+    private StateData removeStateFromSession(HttpSession session, String state) {
+        Map<String, StateData> states = (Map<String, StateData>) session.getAttribute(STATES);
+        if (states != null) {
+            eliminateExpiredStates(states);
+            StateData stateData = states.get(state);
+            if (stateData != null) {
+                states.remove(state);
+                return stateData;
+            }
+        }
+        return null;
+    }
 
-        return redirectUrl;
+    private void eliminateExpiredStates(Map<String, StateData> map) {
+        Iterator<Map.Entry<String, StateData>> it = map.entrySet().iterator();
+
+        Date currTime = new Date();
+        while (it.hasNext()) {
+            Map.Entry<String, StateData> entry = it.next();
+            long diffInSeconds = TimeUnit.MILLISECONDS.
+                    toSeconds(currTime.getTime() - entry.getValue().getExpirationDate().getTime());
+
+            if (diffInSeconds > STATE_TTL) {
+                it.remove();
+            }
+        }
+    }
+
+    private String getRedirectUrl(String claims, String state, String nonce) {
+
+        PublicClientApplication pca = PublicClientApplication.builder(authHelper.getClientId()).build();
+
+        AuthorizationRequestUrlParameters parameters =
+                AuthorizationRequestUrlParameters
+                        .builder(authHelper.getRedirectUri(),
+                                Collections.singleton("openid offline_access profile " + WEBAPI_DEFAULT_SCOPE))
+                        .responseMode(ResponseMode.QUERY)
+                        .scopes(Collections.singleton("openid offline_access profile " + WEBAPI_DEFAULT_SCOPE))
+                        .prompt(Prompt.SELECT_ACCOUNT)
+                        .state(state)
+                        .nonce(nonce)
+                        .build();
+        return pca.getAuthorizationRequestUrl(parameters).toString();
     }
 }

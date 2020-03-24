@@ -79,7 +79,6 @@ As a first step you'll need to:
    - Change **Supported account types** to **Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)**.
 1. Click on the **Register** button to create the application.
 1. In the app's registration **Overview** page, find the **Application (client) ID** and **Directory (tenant) ID** values and record it for use later. You'll need them to configure the configuration file(s) later in your code.
-1. Click the **Save** button to save the changes.
 1. In the Application menu blade, click on the **Certificates & secrets** to open the page where we can generate secrets and upload certificates.
 1. In the **Client secrets** section, click on **New client secret**:
    - Type a key description (for instance `app secret`),
@@ -95,7 +94,7 @@ As a first step you'll need to:
 1. In the Application menu blade, click on the **Expose an API** to open the page where declare the parameters to expose this app as an Api for which client applications can obtain [access tokens](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for.
 The first thing that we need to do is to declare the unique [resource](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow) URI that the clients will be using to obtain access tokens for this Api. To declare an resource URI, follow the following steps:
    - Click `Set` next to the **Application ID URI** to generate a URI that is unique for this app.
-   - For this sample, accept the proposed Application ID URI (api://{clientId}) by selecting **Save**.
+   - For this sample, accept the proposed Application ID URI (api://{clientId}) by selecting **Save**, and record the URI for later reference.
 1. All Apis have to publish a minimum of one [scope](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-auth-code-flow#request-an-authorization-code) for the client's to obtain an access token successfully. To publish a scope, follow the following steps:
    - Select **Add a scope** button open the **Add a scope** screen and Enter the values as indicated below:  
       - For **Scope name**, use `access_as_user`.
@@ -106,6 +105,7 @@ The first thing that we need to do is to declare the unique [resource](https://d
       - For **User consent description** type `Allow the application to access Java-webapi on your behalf.`
       - Keep **State** as **Enabled**
       - Click on the **Add scope** button on the bottom to save this scope.
+      - Record the scope's URI (api://{clientid}/access_as_user) for later reference.
 
 #### Configure the **msal-obo-sample** to use your Azure AD tenant
 
@@ -125,12 +125,12 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
      > Note that there are more than one redirect URIs used in this sample. You'll need to add them from the **Authentication** tab later after the app has been created successfully.
 1. Click on the **Register** button to create the application.
 1. In the app's registration **Overview** page, find the **Application (client) ID** value and record it for later. You'll need it to configure the configuration file(s) later in your code.
-1. In the Application menu blade, click on the **Authentication**.
-   - In the Redirect URIs section, select **Web** in the drop down and enter the following redirect URIs.
-       - `http://localhost:8080/msal4jsample/secure/aad`
-       - `http://localhost:8080/msal4jsample/graph/me`
-
-1. Click the **Save** button to save the changes.
+1. In the app's registration screen, click on the **Authentication** blade in the left and:
+   - In the **Platform configurations** section select **Add a platform** and create a new **Web** application
+   - Enter the following as the redirect URI: `https://localhost:8080/msal4jsample/secure/aad`
+   - Click on **Configure** to save your changes.
+   - Do the same for: `https://localhost:8080/msal4jsample/graph/me`
+   - Click the **Save** button to save the the redirect URI changes.
 1. In the Application menu blade, click on the **Certificates & secrets** to open the page where we can generate secrets and upload certificates.
 1. In the **Client secrets** section, click on **New client secret**:
    - Type a key description (for instance `app secret`),
@@ -140,13 +140,13 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 1. In the Application menu blade, click on the **API permissions** to open the page where we add access to the Apis that your application needs.
    - Click the **Add a permission** button and then,
    - Ensure that the **My APIs** tab is selected.
-   - In the list of APIs, select the API `Java-webapi`.
-   - In the **Delegated permissions** section, select the **access_as_user** in the list. Use the search box if necessary.
+   - In the list of APIs, select the API you created previously, `Java-webapi`.
+   - In the **Delegated permissions** section, select the **access_as_user** in the list.
    - Click on the **Add permissions** button in the bottom.
 
 #### Configure the **msal-web-sample** to use your Azure AD tenant
 
-Open `application.properties` in the src/main/resources folder. Fill in with your tenant and app registration information noted in registration step.
+Open `application.properties` in the msal-web-sample/src/main/resources folder. Fill in with your tenant and app registration information noted in registration step.
 
 - Replace *Enter_the_Application_Id_here* with the **Application (client) ID**.
 - Replace *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
@@ -193,13 +193,13 @@ The following steps are for IntelliJ IDEA. But you can choose and work with any 
 2. Click on '+' (Add new configuration) and select *Application*.
 3. Enter name of the application for example `webapp`
 4. Go to main class and select from the dropdown, for example `MsalWebSampleApplication` also go to *Use classpath of the module* and select from the dropdown, for example `msal-web-sample`.
-5. Click on *Apply*. Follow the same instructions for adding the another application.
+5. Click on *Apply*. Follow the same instructions for adding the other application.
 6. Click on '+' (Add new configuration) and select *Compound*.
 7. Enter a friendly name for in the *Name* for example `Msal-webapi-sample`.
 8. Click on '+' and select the application names you have created in the above steps one at a time.
 9. Click on *Apply*. Select the created configuration and click **Run**. Now both the projects will run at a time.
 
-- Now navigate to the home page of the project. For this sample, the standard home page URL is <http://localhost:8080>
+- Now navigate to the home page of the project. For this sample, the standard home page URL is <https://localhost:8080/msal4jsample>
 
 #### Packaging and deploying to container
 
@@ -213,7 +213,6 @@ If you would like to deploy the sample to Tomcat, you will need to make a couple
          <dependency>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-tomcat</artifactId>
-          <scope>provided</scope>
          </dependency>
          ```
 
@@ -245,7 +244,7 @@ If you would like to deploy the sample to Tomcat, you will need to make a couple
 3. Open a command prompt, go to the root folder of the project, and run `mvn package`
 
 - This will generate a `msal-web-sample-0.1.0.war` file in your /targets directory.
-- Rename this file to `ROOT.war`
+- Rename this file to `msal4jsample.war`
 - Deploy this war file using Tomcat or any other J2EE container solution.
 - To deploy on Tomcat container, copy the .war file to the webapp's folder under your Tomcat installation and then start the Tomcat server.
 - Repeat these steps for the `msal-obo-sample` also.

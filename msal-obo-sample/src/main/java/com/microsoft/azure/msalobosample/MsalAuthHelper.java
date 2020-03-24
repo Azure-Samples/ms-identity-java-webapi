@@ -36,7 +36,7 @@ class MsalAuthHelper {
         String res = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication != null){
+        if (authentication != null) {
             res = ((OAuth2AuthenticationDetails) authentication.getDetails()).getTokenValue();
         }
         return res;
@@ -46,30 +46,33 @@ class MsalAuthHelper {
         String authToken = getAuthToken();
 
         ConfidentialClientApplication application =
-                ConfidentialClientApplication.builder(clientId, ClientCredentialFactory.create(secret))
+                ConfidentialClientApplication.builder(clientId, ClientCredentialFactory.createFromSecret(secret))
                         .authority(authority).build();
 
         String cacheKey = Hashing.sha256()
                 .hashString(authToken, StandardCharsets.UTF_8).toString();
 
         String cachedTokens = cacheManager.getCache("tokens").get(cacheKey, String.class);
-        if(cachedTokens != null){
+        if (cachedTokens != null) {
             application.tokenCache().deserialize(cachedTokens);
         }
 
         IAuthenticationResult auth;
-        SilentParameters silentParameters =
-                SilentParameters.builder(Collections.singleton(scope))
-                        .build();
-        auth = application.acquireTokenSilently(silentParameters).join();
-
-        if (auth == null){
-            OnBehalfOfParameters parameters =
-                    OnBehalfOfParameters.builder(Collections.singleton(scope),
-                            new UserAssertion(authToken))
+        try {
+            SilentParameters silentParameters =
+                    SilentParameters.builder(Collections.singleton(scope))
                             .build();
-
-            auth = application.acquireToken(parameters).join();
+            auth = application.acquireTokenSilently(silentParameters).join();
+        } catch (Exception ex) {
+            if (ex.getCause() instanceof MsalException) {
+                OnBehalfOfParameters parameters =
+                        OnBehalfOfParameters.builder(Collections.singleton(scope),
+                                new UserAssertion(authToken))
+                                .build();
+                auth = application.acquireToken(parameters).join();
+            } else {
+                throw ex;
+            }
         }
 
         cacheManager.getCache("tokens").put(cacheKey, application.tokenCache().serialize());

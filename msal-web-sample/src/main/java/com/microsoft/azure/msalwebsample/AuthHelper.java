@@ -19,13 +19,10 @@ import com.microsoft.aad.msal4j.*;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-@Getter
 class AuthHelper {
 
     static final String PRINCIPAL_SESSION_NAME = "principal";
@@ -49,7 +46,7 @@ class AuthHelper {
     }
 
     private ConfidentialClientApplication createClientApplication() throws MalformedURLException {
-        return ConfidentialClientApplication.builder(clientId, ClientCredentialFactory.create(clientSecret)).
+        return ConfidentialClientApplication.builder(clientId, ClientCredentialFactory.createFromSecret(clientSecret)).
                 authority(authority).
                 build();
     }
@@ -163,5 +160,13 @@ class AuthHelper {
         boolean containsCode = httpParameters.containsKey("code");
 
         return isPostRequest && containsErrorData || containsCode || containIdToken;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
     }
 }

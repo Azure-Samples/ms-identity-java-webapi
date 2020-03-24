@@ -3,27 +3,58 @@
 
 package com.microsoft.azure.msalwebsample;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@Getter
-@Setter
 @Component
 @ConfigurationProperties("aad")
 class BasicConfiguration {
     String clientId;
-    @Getter(AccessLevel.NONE) String authority;
+    String authority;
     String redirectUri;
     String secretKey;
     String oboApi;
 
-    String getAuthority(){
+    public String getClientId() {
+        return clientId;
+    }
+
+    String getAuthority() {
         if (!authority.endsWith("/")) {
             authority += "/";
         }
         return authority;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public String getOboApi() {
+        return oboApi;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public void setAuthority(String authority) {
+        this.authority = authority;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public void setOboApi(String oboApi) {
+        this.oboApi = oboApi;
     }
 }

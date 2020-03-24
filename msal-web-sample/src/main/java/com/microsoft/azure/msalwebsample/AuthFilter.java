@@ -4,9 +4,7 @@
 package com.microsoft.azure.msalwebsample;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.*;

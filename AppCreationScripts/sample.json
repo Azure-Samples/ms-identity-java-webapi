@@ -27,15 +27,15 @@
       "Kind": "WebApp",
       "Audience": "AzureADandPersonalMicrosoftAccount",
       "PasswordCredentials": "Auto",
-      "Homepage":"https://localhost:8080",
+      "Homepage":"https://localhost:8443",
       "RequiredResourcesAccess": [
         {
           "Resource": "service",
           "DelegatedPermissions": ["access_as_user"]
         }
       ],
-      "ReplyUrls": "http://localhost:8080/msal4jsample/secure/aad,http://localhost:8080/msal4jsample/graph/me",
-      "LogoutUrl": "http://localhost:8080/msal4jsample/sign-out"
+      "ReplyUrls": "http://localhost:8443/msal4jsample/secure/aad,http://localhost:8443/msal4jsample/graph/me",
+      "LogoutUrl": "http://localhost:8443/msal4jsample/sign-out"
     }
   ],
   "CodeConfiguration": [

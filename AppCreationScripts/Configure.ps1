@@ -303,9 +303,9 @@ Function ConfigureApplications
    $clientAppKey = $pw
    # create the application 
    $clientAadApplication = New-AzureADApplication -DisplayName "java_webapp" `
-                                                  -HomePage "https://localhost:8080" `
-                                                  -LogoutUrl "https://localhost:8080/msal4jsample/sign-out" `
-                                                  -ReplyUrls "https://localhost:8080/msal4jsample/secure/aad", "http://localhost:8080/msal4jsample/graph/me" `
+                                                  -HomePage "https://localhost:8443" `
+                                                  -LogoutUrl "https://localhost:8443/msal4jsample/sign-out" `
+                                                  -ReplyUrls "https://localhost:8443/msal4jsample/secure/aad", "http://localhost:8443/msal4jsample/graph/me" `
                                                   -IdentifierUris "https://$tenantName/java_webapp" `
                                                   -AvailableToOtherTenants $True `
                                                   -PasswordCredentials $key `

@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.IssuerClaimVerifier;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier;
 import org.springframework.security.oauth2.provider.token.store.jwk.JwkTokenStore;
@@ -29,8 +28,11 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
     @Value("${security.oauth2.resource.id}")
     private String resourceId;
 
-    @Value("${security.oauth2.issuer}")
-    private String issuer;
+    @Value("${security.oauth2.issuers}")
+    private String[] issuers;
+
+    @Value("${security.oauth2.issuer.tenant}")
+    private String issuerTenant;
 
     @Value("${security.oauth2.scope.access-as-user}")
     private String accessAsUserScope;
@@ -72,10 +74,6 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
     @Bean
     public JwtClaimsSetVerifier issuerClaimVerifier() {
-        try {
-            return new IssuerClaimVerifier(new URL(issuer));
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        return new AADIssuerClaimVerifier(issuers, issuerTenant);
     }
 }

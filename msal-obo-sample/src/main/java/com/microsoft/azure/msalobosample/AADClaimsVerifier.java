@@ -24,8 +24,7 @@ public class AADClaimsVerifier implements JwtClaimsSetVerifier {
         Assert.notNull(resourceId, "resourceId (audience) cannot be null");
 
         this.resourceId = resourceId;
-        // prepend https:// and append tenantId. And then duplicate this and append
-        // /v2.0
+        // prepend https:// and append tenantId. And then duplicate this and append /v2.0
         this.issuers = this.addHttpsTenantIdAndV2Endpoints(issuers, issuerTenant);
     }
 

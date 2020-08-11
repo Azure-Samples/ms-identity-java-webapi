@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
@@ -51,7 +52,7 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
     @Bean
     public TokenStore tokenStore() {
-        JwkTokenStore jwkTokenStore = new JwkTokenStore(keySetUri, accessTokenConverter(), issuerClaimVerifier());
+        JwkTokenStore jwkTokenStore = new JwkTokenStore(keySetUri, accessTokenConverter(), claimSetVerifier());
         return jwkTokenStore;
     }
 
@@ -69,11 +70,13 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources){
-        resources.resourceId(resourceId);
+        // we need to set resourceId to null so that spring doesn't try to verify this
+        // this is because the aud claim is variable in AAD (e.g. clientId or api://clientId )
+        resources.resourceId(null);
     }
 
     @Bean
-    public JwtClaimsSetVerifier issuerClaimVerifier() {
-        return new AADIssuerClaimVerifier(issuers, issuerTenant);
+    public JwtClaimsSetVerifier claimSetVerifier() {
+        return new AADClaimsVerifier(issuers, issuerTenant, resourceId);
     }
 }

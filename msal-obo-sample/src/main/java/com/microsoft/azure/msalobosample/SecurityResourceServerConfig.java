@@ -70,8 +70,9 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources){
-        // we need to set resourceId to null so that spring doesn't try to verify this
-        // this is because the aud claim is variable in AAD (e.g. clientId or api://clientId )
+        // we need to set resourceId to null so that spring doesn't try to verify this.
+        // this is because the aud claim is variable in AAD (e.g. clientId or api://clientId ).
+        // we then verify this in our custom verifier (AADClaimsVerifier)
         resources.resourceId(null);
     }
 

@@ -16,23 +16,20 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier;
 import org.springframework.security.oauth2.provider.token.store.jwk.JwkTokenStore;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 @Configuration
 public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Value("${security.oauth2.resource.jwt.key-uri}")
     private String keySetUri;
 
-    @Value("${security.oauth2.resource.id}")
-    private String resourceId;
+    @Value("${security.oauth2.client.client-id}")
+    private String applicationId;
 
-    @Value("${security.oauth2.issuers}")
-    private String[] issuers;
+    @Value("${security.oauth2.aad.aliases}")
+    private String[] aadAliases;
 
-    @Value("${security.oauth2.issuer.tenant}")
-    private String issuerTenant;
+    @Value("${security.oauth2.accepted.tenants}")
+    private String[] acceptedTenants;
 
     @Value("${security.oauth2.scope.access-as-user}")
     private String accessAsUserScope;
@@ -51,7 +48,7 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
     @Bean
     public TokenStore tokenStore() {
-        JwkTokenStore jwkTokenStore = new JwkTokenStore(keySetUri, accessTokenConverter(), issuerClaimVerifier());
+        JwkTokenStore jwkTokenStore = new JwkTokenStore(keySetUri, accessTokenConverter(), claimSetVerifier());
         return jwkTokenStore;
     }
 
@@ -69,11 +66,14 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources){
-        resources.resourceId(resourceId);
+        // we need to set resourceId to null so that spring doesn't try to verify this.
+        // this is because the aud claim is variable in AAD (e.g. clientId or api://clientId ).
+        // we then verify this in our custom verifier (AADClaimsVerifier)
+        resources.resourceId(null);
     }
 
     @Bean
-    public JwtClaimsSetVerifier issuerClaimVerifier() {
-        return new AADIssuerClaimVerifier(issuers, issuerTenant);
+    public JwtClaimsSetVerifier claimSetVerifier() {
+        return new AADClaimsVerifier(aadAliases, acceptedTenants, applicationId);
     }
 }

@@ -2,8 +2,14 @@
 param(    
     [PSCredential] $Credential,
     [Parameter(Mandatory=$False, HelpMessage='Tenant ID (This is a GUID which represents the "Directory ID" of the AzureAD tenant into which you want to create the apps')]
-    [string] $tenantId
+    [string] $tenantId,
+    [Parameter(Mandatory=$False, HelpMessage='Azure environment to use while running the script (it defaults to AzureCloud)')]
+    [string] $azureEnvironmentName
 )
+
+#Requires -Modules AzureAD
+
+
 
 if ($null -eq (Get-Module -ListAvailable -Name "AzureAD")) { 
     Install-Module "AzureAD" -Scope CurrentUser 
@@ -13,10 +19,15 @@ $ErrorActionPreference = "Stop"
 
 Function Cleanup
 {
-<#
-.Description
-This function removes the Azure AD applications for the sample. These applications were created by the Configure.ps1 script
-#>
+    if (!$azureEnvironmentName)
+    {
+        $azureEnvironmentName = "AzureCloud"
+    }
+
+    <#
+    .Description
+    This function removes the Azure AD applications for the sample. These applications were created by the Configure.ps1 script
+    #>
 
     # $tenantId is the Active Directory Tenant. This is a GUID which represents the "Directory ID" of the AzureAD tenant 
     # into which you want to create the apps. Look it up in the Azure portal in the "Properties" of the Azure AD. 
@@ -25,17 +36,17 @@ This function removes the Azure AD applications for the sample. These applicatio
     # you'll need to sign-in with creds enabling your to create apps in the tenant)
     if (!$Credential -and $TenantId)
     {
-        $creds = Connect-AzureAD -TenantId $tenantId
+        $creds = Connect-AzureAD -TenantId $tenantId -AzureEnvironmentName $azureEnvironmentName
     }
     else
     {
         if (!$TenantId)
         {
-            $creds = Connect-AzureAD -Credential $Credential
+            $creds = Connect-AzureAD -Credential $Credential -AzureEnvironmentName $azureEnvironmentName
         }
         else
         {
-            $creds = Connect-AzureAD -TenantId $tenantId -Credential $Credential
+            $creds = Connect-AzureAD -TenantId $tenantId -Credential $Credential -AzureEnvironmentName $azureEnvironmentName
         }
     }
 
@@ -48,6 +59,7 @@ This function removes the Azure AD applications for the sample. These applicatio
     
     # Removes the applications
     Write-Host "Cleaning-up applications from tenant '$tenantName'"
+
 
     Write-Host "Removing 'service' (java_webapi) if needed"
     Get-AzureADApplication -Filter "DisplayName eq 'java_webapi'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
@@ -65,6 +77,7 @@ This function removes the Azure AD applications for the sample. These applicatio
     # also remove service principals of this app
     Get-AzureADServicePrincipal -filter "DisplayName eq 'java_webapi'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
     
+
     Write-Host "Removing 'client' (java_webapp) if needed"
     Get-AzureADApplication -Filter "DisplayName eq 'java_webapp'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
     $apps = Get-AzureADApplication -Filter "DisplayName eq 'java_webapp'"
@@ -81,6 +94,7 @@ This function removes the Azure AD applications for the sample. These applicatio
     # also remove service principals of this app
     Get-AzureADServicePrincipal -filter "DisplayName eq 'java_webapp'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
     
+
 }
 
 Cleanup -Credential $Credential -tenantId $TenantId

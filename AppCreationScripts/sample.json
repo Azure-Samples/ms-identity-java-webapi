@@ -1,13 +1,12 @@
 {
   "Sample": {
-    "Title": "This sample demonstrates a Java web app calling a Java Web API which calls another downstream API (Microsoft Graph) using the On-Behalf-Of flow.",
-    "Client": "Java web app",
-    "Level": 300,
-    "Service": "Java Web API",
-    "RepositoryUrl": "ms-identity-java-webapi",
-    "Endpoint": "AAD v2.0"
+      "Title": "This sample demonstrates a Java web app calling a Java Web API which calls another downstream API (Microsoft Graph) using the On-Behalf-Of flow.",
+      "Level": 300,
+      "Client": "Java Webapp",
+      "Service": "Java Web API",
+      "RepositoryUrl": "ms-identity-java-webapi",
+      "Endpoint": "AAD v2.0"
   },
-
   /*
     This section describes the Azure AD Applications to configure, and their dependencies
   */
@@ -17,17 +16,17 @@
       "Name": "java_webapi",
       "Kind": "WebApi",
       "PasswordCredentials": "Auto",
-      "HomePage": "https://localhost:8081",
       "Audience": "AzureADMultipleOrgs",
+      "HomePage": "http://localhost:8081",
       "RequiredResourcesAccess": [
         {
           "Resource": "Microsoft Graph",
-          "DelegatedPermissions": [ "User.Read" ]
+          "DelegatedPermissions": [ "User.Read", "offline_access" ]
         }
       ],
       "ManualSteps": [
         {
-          "Comment": "Navigate to the portal and change the ','signInAudience' to 'AzureADandPersonalMicrosoftAccount'  in the app's manifest !"
+          "Comment": "Navigate to the portal and change the 'signInAudience' to 'AzureADandPersonalMicrosoftAccount'  in the app's manifest !"
         }
       ]
     },
@@ -36,10 +35,9 @@
       "Name": "java_webapp",
       "Kind": "WebApp",
       "Audience": "AzureADMultipleOrgs",
+      "HomePage": "http://localhost:8443/msal4jsample",
       "PasswordCredentials": "Auto",
-      "HomePage": "https://localhost:8443",
       "ReplyUrls": "http://localhost:8443/msal4jsample/secure/aad,http://localhost:8443/msal4jsample/graph/me",
-      "LogoutUrl": "http://localhost:8443/msal4jsample/sign-out",
       "RequiredResourcesAccess": [
         {
           "Resource": "service",
@@ -48,7 +46,6 @@
       ]
     }
   ],
-
   /*
     This section describes how to update the code in configuration files from the apps coordinates, once the apps
     are created in Azure AD.
@@ -56,14 +53,42 @@
     with respect to the root of the sample, and the mappping (which string in the config file is mapped to which value
   */
   "CodeConfiguration": [
-    {      
-      "App": "client",
-      "SettingKind": "Text",
-      "SettingFile": "\\..\\Client\\appsettings.json",
+    {
+      "App": "service",
+      "SettingKind": "Replace",
+      "SettingFile": "\\..\\msal-obo-sample\\src\\main\\resources\\application.properties",
       "Mappings": [
         {
-          "key": "Domain",
-          "value": "$tenantName"        
+          "key": "Enter_the_Tenant_Info_Here",
+          "value": "$tenantId"
+        },
+        {
+          "key": "Enter_the_Application_Id_Here",
+          "value": "service.AppId"
+        },
+        {
+          "key": "Enter_the_Client_Secret_Here",
+          "value": "service.AppKey"
+        }
+
+      ]
+    },
+    {
+      "App": "client",
+      "SettingKind": "Replace",
+      "SettingFile": "\\..\\msal-web-sample\\src\\main\\resources\\application.properties",
+      "Mappings": [
+        {
+          "key": "Enter_the_Application_Id_Here",
+          "value": "client.AppId"
+        },
+        {
+          "key": "Enter_the_Client_Secret_Here",
+          "value": "client.AppKey"
+        },
+        {
+          "key": "Enter_the_Obo_Api_Application_Id_Here",
+          "value": "service.AppId"
         }
       ]
     }

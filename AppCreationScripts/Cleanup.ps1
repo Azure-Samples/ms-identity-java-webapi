@@ -10,6 +10,7 @@ param(
 #Requires -Modules AzureAD
 
 
+
 if ($null -eq (Get-Module -ListAvailable -Name "AzureAD")) { 
     Install-Module "AzureAD" -Scope CurrentUser 
 } 
@@ -59,6 +60,7 @@ Function Cleanup
     # Removes the applications
     Write-Host "Cleaning-up applications from tenant '$tenantName'"
 
+
     Write-Host "Removing 'service' (java_webapi) if needed"
     Get-AzureADApplication -Filter "DisplayName eq 'java_webapi'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
     $apps = Get-AzureADApplication -Filter "DisplayName eq 'java_webapi'"
@@ -75,6 +77,7 @@ Function Cleanup
     # also remove service principals of this app
     Get-AzureADServicePrincipal -filter "DisplayName eq 'java_webapi'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
     
+
     Write-Host "Removing 'client' (java_webapp) if needed"
     Get-AzureADApplication -Filter "DisplayName eq 'java_webapp'"  | ForEach-Object {Remove-AzureADApplication -ObjectId $_.ObjectId }
     $apps = Get-AzureADApplication -Filter "DisplayName eq 'java_webapp'"
@@ -91,6 +94,7 @@ Function Cleanup
     # also remove service principals of this app
     Get-AzureADServicePrincipal -filter "DisplayName eq 'java_webapp'" | ForEach-Object {Remove-AzureADServicePrincipal -ObjectId $_.Id -Confirm:$false}
     
+
 }
 
 Cleanup -Credential $Credential -tenantId $TenantId

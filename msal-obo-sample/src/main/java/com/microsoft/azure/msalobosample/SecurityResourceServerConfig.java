@@ -22,7 +22,7 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
     @Value("${security.oauth2.resource.jwt.key-uri}")
     private String keySetUri;
 
-    @Value("${security.oauth2.resource.id}")
+    @Value("${security.oauth2.client.client-id}")
     private String applicationId;
 
     @Value("${security.oauth2.aad.aliases}")

@@ -16,9 +16,6 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier;
 import org.springframework.security.oauth2.provider.token.store.jwk.JwkTokenStore;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 @Configuration
 public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapter {
 
@@ -26,13 +23,13 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
     private String keySetUri;
 
     @Value("${security.oauth2.resource.id}")
-    private String resourceId;
+    private String applicationId;
 
-    @Value("${security.oauth2.issuers}")
-    private String[] issuers;
+    @Value("${security.oauth2.aad.aliases}")
+    private String[] aadAliases;
 
-    @Value("${security.oauth2.issuer.tenant}")
-    private String issuerTenant;
+    @Value("${security.oauth2.accepted.tenants}")
+    private String[] acceptedTenants;
 
     @Value("${security.oauth2.scope.access-as-user}")
     private String accessAsUserScope;
@@ -77,6 +74,6 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
     @Bean
     public JwtClaimsSetVerifier claimSetVerifier() {
-        return new AADClaimsVerifier(issuers, issuerTenant, resourceId);
+        return new AADClaimsVerifier(aadAliases, acceptedTenants, applicationId);
     }
 }

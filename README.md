@@ -107,6 +107,19 @@ The first thing that we need to do is to declare the unique [resource](https://d
       - Keep **State** as **Enabled**
       - Click on the **Add scope** button on the bottom to save this scope.
       - Record the scope's URI (api://{clientid}/access_as_user) for later reference.
+1. Optional: If your application expects to have users with varying access levels, then you can further secure the API by assigning groups and users
+    - If you do not have some already, create a group in Azure
+        - Navigate to the `Azure Active Directory` service, and select the `Groups` page
+        - Select `New Group` at the top, and create an appropriate group for this sample
+            - Name it something meaningful, such as `java-webapi-group`, as well as a description for what the group is used for
+            - In the `Members` section, add any accounts you plan to use when testing this sample
+    - Once you have a group, you can assign it to your application and restrict access to only members of that group
+        - Navigate to the `Azure Active Directory` service, and select the `Enterprise Applications` page
+        - Find and select the application you created (`Java-webapi`) in the list shown
+            - On the page for your application, select `Properties`, and in the Properties page set `User assignment required?` to yes and save this change
+            - On the page for your application, select `Users and Groups`, and select `Add Users` at the top
+            - You can now add the group you created above (or any other group), and/or individual users, and select `Assign` to assign them to the app
+                - Because you set `User assignment required?` to yes, only the groups/users you add here will be able to use your app
 
 #### Configure the **msal-obo-sample** to use your Azure AD tenant
 
@@ -144,6 +157,21 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
    - In the list of APIs, select the API you created previously, `Java-webapi`.
    - In the **Delegated permissions** section, select the **access_as_user** in the list.
    - Click on the **Add permissions** button in the bottom.
+1. Optional: If your application expects to have users with varying access levels, then you can further secure your web service by configuring your application to return group claims in tokens
+    - First, if you do not already have a group to use in this sample, create one by following the relevant optional steps in [the API setup section]((#### Register the Web Api app (Java-webapi))
+    - In the `App Registrations` page for your application (`java_webapp`), select the `Token Configuration` section
+    - Select `Add groups claim` at the top
+        - Under `Select group types to include`, select `Groups assigned to the application`
+        - Under the `ID` section, select `Group ID`
+            - If you plan on having the API also use groups to limit access, then under the `Access` section select `Group ID` as well
+        - Save these changes
+    - Navigate to the `Azure Active Directory` service, and select the `Enterprise Applications` page
+    - Find and select the application you created (`java_webapp`) in the list shown
+        - On the page for your application, select `Properties`, and in the Properties page set `User assignment required?` to yes and save this change
+        - On the page for your application, select `Users and Groups`, and select `Add Users` at the top
+        - You can now add the group(s) you want to all access to, and select `Assign` to assign them to the app
+            - Because you set `User assignment required?` to yes, only the groups/users you add here will be able to use your app
+    - In addition to restricting access on the Azure side, any tokens returned by your app will now contain a `groups` claim, containing the unique Object Id value(s) of groups the user is assigned to
 
 #### Configure the **msal-web-sample** to use your Azure AD tenant
 

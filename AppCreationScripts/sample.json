@@ -35,9 +35,9 @@
       "Name": "java_webapp",
       "Kind": "WebApp",
       "Audience": "AzureADMultipleOrgs",
-      "HomePage": "http://localhost:8443/msal4jsample",
+      "HomePage": "http://localhost:8080/msal4jsample",
       "PasswordCredentials": "Auto",
-      "ReplyUrls": "http://localhost:8443/msal4jsample/secure/aad,http://localhost:8443/msal4jsample/graph/me",
+      "ReplyUrls": "http://localhost:8080/msal4jsample/secure/aad,http://localhost:8080/msal4jsample/graph/me",
       "RequiredResourcesAccess": [
         {
           "Resource": "service",

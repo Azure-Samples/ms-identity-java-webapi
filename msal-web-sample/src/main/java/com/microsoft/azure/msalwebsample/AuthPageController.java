@@ -6,6 +6,7 @@ package com.microsoft.azure.msalwebsample;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.nimbusds.jwt.JWTParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -29,6 +30,9 @@ public class AuthPageController {
     @Autowired
     AuthHelper authHelper;
 
+    @Value("${aad.homePage}")
+    String appHomePage;
+
     @RequestMapping("/msal4jsample")
     public String homepage(){
         return "index";
@@ -48,9 +52,8 @@ public class AuthPageController {
 
         httpRequest.getSession().invalidate();
 
-        String redirectUrl = "http://localhost:8443/msal4jsample/";
         response.sendRedirect(AuthHelper.END_SESSION_ENDPOINT +
-                "?post_logout_redirect_uri=" + URLEncoder.encode(redirectUrl, "UTF-8"));
+                "?post_logout_redirect_uri=" + URLEncoder.encode(appHomePage, "UTF-8"));
     }
 
     private void setAccountInfo(ModelAndView model, HttpServletRequest httpRequest) throws ParseException {

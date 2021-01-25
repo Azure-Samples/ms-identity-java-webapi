@@ -128,9 +128,9 @@ Open `application.properties` in the src/main/resources folder. Fill in with you
 1. In the app's registration **Overview** page, find the **Application (client) ID** value and record it for later. You'll need it to configure the configuration file(s) later in your code.
 1. In the app's registration screen, click on the **Authentication** blade in the left and:
    - In the **Platform configurations** section select **Add a platform** and create a new **Web** application
-   - Enter the following as the redirect URI: `https://localhost:8443/msal4jsample/secure/aad`
+   - Enter the following as the redirect URI: `http://localhost:8080/msal4jsample/secure/aad`
    - Click on **Configure** to save your changes.
-   - Do the same for: `https://localhost:8443/msal4jsample/graph/me`
+   - Do the same for: `http://localhost:8080/msal4jsample/graph/me`
    - Click the **Save** button to save the the redirect URI changes.
 1. In the Application menu blade, click on the **Certificates & secrets** to open the page where we can generate secrets and upload certificates.
 1. In the **Client secrets** section, click on **New client secret**:
@@ -153,16 +153,21 @@ Open `application.properties` in the msal-web-sample/src/main/resources folder. 
 - Replace *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
 - Replace *OboApi* with the API exposed in the `Web Api app` **(api://{clientId})**.
 
-In order to use https with localhost fill in server.ssl.key properties.  
-Use keytool utility (included in JRE) if you want to generate self-signed certificate.
+If you want to use https with localhost, you must have a certificate.
+Use the `keytool` utility (included in JRE) if you want to generate self-signed certificate.
 
-Example:  
+```Bash
 keytool -genkeypair -alias testCert -keyalg RSA -storetype PKCS12 -keystore keystore.p12 -storepass password
+```
 
-server.ssl.key-store-type=PKCS12  
-server.ssl.key-store=classpath:keystore.p12  
-server.ssl.key-store-password=password  
-server.ssl.key-alias=testCert 
+You may then put the following key-value pairs into your `application.properties` file.
+
+```ini
+server.ssl.key-store-type=PKCS12
+server.ssl.key-store=classpath:keystore.p12
+server.ssl.key-store-password=password
+server.ssl.key-alias=testCert
+```
 
 #### Configure known client applications for service (Java-webapi)
 
@@ -200,7 +205,7 @@ The following steps are for IntelliJ IDEA. But you can choose and work with any 
 8. Click on '+' and select the application names you have created in the above steps one at a time.
 9. Click on *Apply*. Select the created configuration and click **Run**. Now both the projects will run at a time.
 
-- Now navigate to the home page of the project. For this sample, the standard home page URL is <https://localhost:8443/msal4jsample>
+- Now navigate to the home page of the project. For this sample, the standard home page URL is <https://localhost:8080/msal4jsample>
 
 #### Packaging and deploying to container
 

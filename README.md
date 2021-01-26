@@ -155,7 +155,7 @@ Open `application.properties` in the msal-web-sample/src/main/resources folder. 
 
 #### HTTPS on localhost
 
-If you want your application to use https while developing on localhost, complete the instructions in this section. You may skip this step if you do not need to do this.
+If you are only testing locally, you may skip this step. If you deploy your app to Azure App Service (for production or for testing), https is handled by Azure and you may skip this step. Note that https is essential for providing critical security and data integrity to your applications, and http should not be used outside of testing scenarios. If you need to configure your application to handle https, complete the instructions in this section.
 
 1. Use the `keytool` utility (included in JRE) if you want to generate self-signed certificate.
 

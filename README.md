@@ -153,21 +153,27 @@ Open `application.properties` in the msal-web-sample/src/main/resources folder. 
 - Replace *Enter_the_Client_Secret_Here* with the **key value** noted earlier.
 - Replace *OboApi* with the API exposed in the `Web Api app` **(api://{clientId})**.
 
-If you want to use https with localhost, you must have a certificate.
-Use the `keytool` utility (included in JRE) if you want to generate self-signed certificate.
+#### HTTPS on localhost
 
-```Bash
-keytool -genkeypair -alias testCert -keyalg RSA -storetype PKCS12 -keystore keystore.p12 -storepass password
-```
+If you are only testing locally, you may skip this step. If you deploy your app to Azure App Service (for production or for testing), https is handled by Azure and you may skip this step. Note that https is essential for providing critical security and data integrity to your applications, and http should not be used outside of testing scenarios. If you need to configure your application to handle https, complete the instructions in this section.
 
-You may then put the following key-value pairs into your `application.properties` file.
+1. Use the `keytool` utility (included in JRE) if you want to generate self-signed certificate.
 
-```ini
-server.ssl.key-store-type=PKCS12
-server.ssl.key-store=classpath:keystore.p12
-server.ssl.key-store-password=password
-server.ssl.key-alias=testCert
-```
+    ```Bash
+    keytool -genkeypair -alias testCert -keyalg RSA -storetype PKCS12 -keystore keystore.p12 -storepass password
+    ```
+
+2. Put the following key-value pairs into your [application.properties](msal-web-sample/src/main/resources/application.properties) file.
+
+    ```ini
+    server.ssl.key-store-type=PKCS12
+    server.ssl.key-store=classpath:keystore.p12
+    server.ssl.key-store-password=password
+    server.ssl.key-alias=testCert
+    ```
+
+3. Change both occurrences of `8080` to `8443` in the msal-web-sample's [application.properties](msal-web-sample/src/main/resources/application.properties) file.
+4. Update your java_webapp Azure AD application registration redirects (e.g., `https://localhost:8443/msal4jsample/secure/aad` and `https://localhost:8443/msal4jsample/graph/me`) on the [Azure Portal](https://portal.azure.com).
 
 #### Configure known client applications for service (Java-webapi)
 

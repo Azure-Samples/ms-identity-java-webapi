@@ -11,7 +11,8 @@ import com.microsoft.aad.msal4j.MsalException;
 import com.microsoft.aad.msal4j.OnBehalfOfParameters;
 import com.microsoft.aad.msal4j.SilentParameters;
 import com.microsoft.aad.msal4j.UserAssertion;
-import com.microsoft.graph.authentication.IAuthenticationProvider;
+import com.microsoft.graph.authentication.BaseAuthenticationProvider;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -27,7 +28,7 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 @Component
-class OboAuthProvider implements IAuthenticationProvider {
+class OboAuthProvider extends BaseAuthenticationProvider {
 
     @Value("${security.oauth2.client.authority}")
     private String authority;
@@ -44,6 +45,7 @@ class OboAuthProvider implements IAuthenticationProvider {
     @Autowired
     CacheManager cacheManager;
 
+    @NotNull
     @Override
     public CompletableFuture<String> getAuthorizationTokenAsync(@Nonnull URL url) {
 
@@ -90,8 +92,6 @@ class OboAuthProvider implements IAuthenticationProvider {
      * Retrieves the access token token included in the incoming request. This access token will
      * be exchanged for an access token to access Microsoft Graph, on behalf of the user that is
      * signed in the web application.
-     *
-     * @return
      */
     private String getAuthToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

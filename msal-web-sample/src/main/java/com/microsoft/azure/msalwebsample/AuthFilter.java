@@ -74,7 +74,7 @@ public class AuthFilter extends OncePerRequestFilter {
                 // Attempt to refresh tokens and session
                 IAuthenticationResult result = authHelper.getAuthResultBySilentFlow(
                         httpRequest,
-                        authHelper.getApiDefaultScope());
+                        authHelper.getOboDefaultScope());
                 authHelper.setSessionPrincipal(httpRequest, result);
             }
         } catch (MsalException msalException) {

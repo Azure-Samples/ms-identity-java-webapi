@@ -48,10 +48,7 @@ To run this sample, you'll need:
 
 To successfully use this sample, you need a working installation of [Java](https://openjdk.java.net/install/) and [Maven](https://maven.apache.org/).
 
-### Step 2:  Clone or download this repository your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then **switch directory**.
-                                                 Change your portal session to the desired Azure AD tenant.
-                                              1. In the portal menu, select the **Azure Active Directory** service, and then select **App registrations**.
-
+### Step 2:  Clone or download this repository 
 
 From your shell or command line:
 
@@ -69,7 +66,7 @@ As a first step you'll need to:
 
 1. Sign in to the [Azure portal](https://portal.azure.com) using either a work or school account or a personal Microsoft account.
 1. If your account is present in more than one Azure AD tenant, select your profile at the top right corner in the menu on top of the page, and then switch directory. Change your portal session to the desired Azure AD tenant.
-In the portal menu, select the Azure Active Directory service, and then select App registrations.
+1. In the portal menu, select the Azure Active Directory service, and then select App registrations.
 > In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are presented in the **Properties** of the Azure Active Directory window respectively as *Name* and *Directory ID*
 
 #### Register the Web Api app (Java-webapi)

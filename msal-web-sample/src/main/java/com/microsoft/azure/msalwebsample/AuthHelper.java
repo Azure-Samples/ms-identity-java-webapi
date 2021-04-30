@@ -29,7 +29,7 @@ class AuthHelper {
     private String clientSecret;
     private String authority;
     private String redirectUri;
-    private String apiDefaultScope;
+    private String oboDefaultScope;
     private String logoutRedirectUrl;
 
     @Autowired
@@ -41,7 +41,7 @@ class AuthHelper {
         authority = configuration.getAuthority();
         clientSecret = configuration.getSecretKey();
         redirectUri = configuration.getRedirectUri();
-        apiDefaultScope = configuration.getApiDefaultScope();
+        oboDefaultScope = configuration.getOboDefaultScope();
         logoutRedirectUrl = configuration.getLogoutRedirectUri();
     }
 
@@ -115,7 +115,7 @@ class AuthHelper {
         AuthorizationRequestUrlParameters parameters =
                 AuthorizationRequestUrlParameters
                         .builder(redirectUri,
-                                new HashSet<>(Arrays.asList(apiDefaultScope)))
+                                new HashSet<>(Arrays.asList(oboDefaultScope)))
                         .responseMode(ResponseMode.FORM_POST)
                         .prompt(Prompt.SELECT_ACCOUNT)
                         .state(state)
@@ -166,8 +166,8 @@ class AuthHelper {
         return isPostRequest && (containsErrorData || containsCode || containIdToken);
     }
 
-    public String getApiDefaultScope() {
-        return apiDefaultScope;
+    public String getOboDefaultScope() {
+        return oboDefaultScope;
     }
 
     public String getLogoutRedirectUrl() {

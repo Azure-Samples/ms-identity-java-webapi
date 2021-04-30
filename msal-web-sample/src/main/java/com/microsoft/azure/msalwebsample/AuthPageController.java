@@ -43,20 +43,29 @@ public class AuthPageController {
     }
 
     @RequestMapping("/msal4jsample/sign_out")
-    public void signOut(HttpServletRequest httpRequest, HttpServletResponse response) throws IOException {
+    public void signOut(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         httpRequest.getSession().invalidate();
 
-        response.sendRedirect(AuthHelper.END_SESSION_ENDPOINT +
+        httpResponse.sendRedirect(AuthHelper.END_SESSION_ENDPOINT +
                 "?post_logout_redirect_uri=" + URLEncoder.encode(authHelper.getLogoutRedirectUrl(), "UTF-8"));
     }
 
     @RequestMapping("/obo_api")
-    public ModelAndView callOboApi(HttpServletRequest httpRequest) throws Exception {
-        ModelAndView mav = new ModelAndView("auth_page");
-        setAccountInfo(mav, httpRequest);
+    public ModelAndView callOboApi(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
 
-        IAuthenticationResult result = authHelper.getAuthResultBySilentFlow(httpRequest, authHelper.configuration.apiDefaultScope);
-        String oboApiCallResult = callOboService(result.accessToken());
+        ModelAndView mav = new ModelAndView("auth_page");
+        String oboApiCallResult = null;
+        try {
+            setAccountInfo(mav, httpRequest);
+
+            IAuthenticationResult result = authHelper.getAuthResultBySilentFlow(httpRequest, authHelper.configuration.oboDefaultScope);
+            oboApiCallResult = callOboService(result.accessToken());
+        } catch (Exception ex) {
+            authHelper.removePrincipalFromSession(httpRequest);
+            httpResponse.setStatus(500);
+            httpRequest.setAttribute("error", ex.getMessage());
+            httpRequest.getRequestDispatcher("/error").forward(httpRequest, httpResponse);
+        }
 
         mav.addObject("obo_api_call_res", oboApiCallResult);
         return mav;

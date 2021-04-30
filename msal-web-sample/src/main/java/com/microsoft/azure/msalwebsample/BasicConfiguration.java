@@ -14,7 +14,7 @@ class BasicConfiguration {
     String redirectUri;
     String logoutRedirectUri;
     String secretKey;
-    String apiDefaultScope;
+    String oboDefaultScope;
 
     public String getClientId() {
         return clientId;
@@ -39,8 +39,8 @@ class BasicConfiguration {
         return secretKey;
     }
 
-    public String getApiDefaultScope() {
-        return apiDefaultScope;
+    public String getOboDefaultScope() {
+        return oboDefaultScope;
     }
 
     public void setClientId(String clientId) {
@@ -59,8 +59,8 @@ class BasicConfiguration {
         this.secretKey = secretKey;
     }
 
-    public void setApiDefaultScope(String apiDefaultScope) {
-        this.apiDefaultScope = apiDefaultScope;
+    public void setOboDefaultScope(String oboDefaultScope) {
+        this.oboDefaultScope = oboDefaultScope;
     }
 
     public void setLogoutRedirectUri(String logoutRedirectUri) {

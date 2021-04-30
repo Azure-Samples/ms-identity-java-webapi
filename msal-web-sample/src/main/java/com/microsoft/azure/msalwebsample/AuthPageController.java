@@ -6,7 +6,6 @@ package com.microsoft.azure.msalwebsample;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.nimbusds.jwt.JWTParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,11 +29,8 @@ public class AuthPageController {
     @Autowired
     AuthHelper authHelper;
 
-    @Value("${aad.homePage}")
-    String appHomePage;
-
     @RequestMapping("/msal4jsample")
-    public String homepage(){
+    public String homepage() {
         return "index";
     }
 
@@ -43,17 +39,36 @@ public class AuthPageController {
         ModelAndView mav = new ModelAndView("auth_page");
 
         setAccountInfo(mav, httpRequest);
-
         return mav;
     }
 
     @RequestMapping("/msal4jsample/sign_out")
-    public void signOut(HttpServletRequest httpRequest, HttpServletResponse response) throws ParseException, IOException {
-
+    public void signOut(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         httpRequest.getSession().invalidate();
 
-        response.sendRedirect(AuthHelper.END_SESSION_ENDPOINT +
-                "?post_logout_redirect_uri=" + URLEncoder.encode(appHomePage, "UTF-8"));
+        httpResponse.sendRedirect(AuthHelper.END_SESSION_ENDPOINT +
+                "?post_logout_redirect_uri=" + URLEncoder.encode(authHelper.getLogoutRedirectUrl(), "UTF-8"));
+    }
+
+    @RequestMapping("/obo_api")
+    public ModelAndView callOboApi(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+
+        ModelAndView mav = new ModelAndView("auth_page");
+        String oboApiCallResult = null;
+        try {
+            setAccountInfo(mav, httpRequest);
+
+            IAuthenticationResult result = authHelper.getAuthResultBySilentFlow(httpRequest, authHelper.configuration.oboDefaultScope);
+            oboApiCallResult = callOboService(result.accessToken());
+        } catch (Exception ex) {
+            authHelper.removePrincipalFromSession(httpRequest);
+            httpResponse.setStatus(500);
+            httpRequest.setAttribute("error", ex.getMessage());
+            httpRequest.getRequestDispatcher("/error").forward(httpRequest, httpResponse);
+        }
+
+        mav.addObject("obo_api_call_res", oboApiCallResult);
+        return mav;
     }
 
     private void setAccountInfo(ModelAndView model, HttpServletRequest httpRequest) throws ParseException {
@@ -65,33 +80,15 @@ public class AuthPageController {
         model.addObject("account", getAuthSessionObject(httpRequest).account());
     }
 
-    @RequestMapping("/obo_api")
-    public ModelAndView callOboApi(HttpServletRequest httpRequest) throws Throwable {
-        ModelAndView mav = new ModelAndView("auth_page");
-        setAccountInfo(mav, httpRequest);
-
-        IAuthenticationResult result =  authHelper.getAuthResultBySilentFlow(httpRequest, authHelper.configuration.oboApi);
-
-        String oboApiCallRes = callOboService(result.accessToken());
-
-        mav.addObject("obo_api_call_res", oboApiCallRes);
-
-        return mav;
-    }
-
-    private String callOboService(String accessToken){
+    private String callOboService(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         headers.set("Authorization", "Bearer " + accessToken);
-
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
-        String result = restTemplate.exchange("http://localhost:8081/graphMeApi", HttpMethod.GET,
+        return restTemplate.exchange("http://localhost:8081/graphMeApi", HttpMethod.GET,
                 entity, String.class).getBody();
-
-        return result;
     }
 }

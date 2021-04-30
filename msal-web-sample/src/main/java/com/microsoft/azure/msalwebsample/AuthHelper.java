@@ -3,16 +3,12 @@
 
 package com.microsoft.azure.msalwebsample;
 
-import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import javax.annotation.PostConstruct;
-import javax.naming.ServiceUnavailableException;
 import javax.servlet.http.HttpServletRequest;
 
 import com.microsoft.aad.msal4j.*;
@@ -33,6 +29,8 @@ class AuthHelper {
     private String clientSecret;
     private String authority;
     private String redirectUri;
+    private String oboDefaultScope;
+    private String logoutRedirectUrl;
 
     @Autowired
     BasicConfiguration configuration;
@@ -43,81 +41,91 @@ class AuthHelper {
         authority = configuration.getAuthority();
         clientSecret = configuration.getSecretKey();
         redirectUri = configuration.getRedirectUri();
+        oboDefaultScope = configuration.getOboDefaultScope();
+        logoutRedirectUrl = configuration.getLogoutRedirectUri();
     }
 
-    private ConfidentialClientApplication createClientApplication() throws MalformedURLException {
-        return ConfidentialClientApplication.builder(clientId, ClientCredentialFactory.createFromSecret(clientSecret)).
-                authority(authority).
-                build();
-    }
-
-    IAuthenticationResult getAuthResultBySilentFlow(HttpServletRequest httpRequest, String scope) throws Throwable {
-        IAuthenticationResult result =  AuthHelper.getAuthSessionObject(httpRequest);
-
-        IAuthenticationResult updatedResult;
-        ConfidentialClientApplication app;
+    private ConfidentialClientApplication createClientApplication() {
+        ConfidentialClientApplication cca;
         try {
-            app = createClientApplication();
+            cca = ConfidentialClientApplication.builder(clientId, ClientCredentialFactory.createFromSecret(clientSecret)).
+                    authority(authority).
+                    build();
+        } catch (Exception ex) {
+            throw new AuthException(String.format("Error creating client application object: %s", ex.getMessage()),
+                    ex.getCause());
+        }
+        return cca;
+    }
 
-            Object tokenCache =  httpRequest.getSession().getAttribute("token_cache");
-            if(tokenCache != null){
-                app.tokenCache().deserialize(tokenCache.toString());
-            }
+    IAuthenticationResult getAuthResultBySilentFlow(HttpServletRequest httpRequest, String scope) throws Exception {
+        IAuthenticationResult result = AuthHelper.getAuthSessionObject(httpRequest);
 
-            SilentParameters parameters = SilentParameters.builder(
-                    Collections.singleton(scope),
-                    result.account()).build();
+        ConfidentialClientApplication app;
+        app = createClientApplication();
 
-            CompletableFuture<IAuthenticationResult> future = app.acquireTokenSilently(parameters);
-
-            updatedResult = future.get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
+        Object tokenCache = httpRequest.getSession().getAttribute("token_cache");
+        if (tokenCache != null) {
+            app.tokenCache().deserialize(tokenCache.toString());
         }
 
-        if (updatedResult == null) {
-            throw new ServiceUnavailableException("authentication result was null");
-        }
+        SilentParameters parameters = SilentParameters.builder(
+                Collections.singleton(scope),
+                result.account()).build();
+
+        IAuthenticationResult updatedResult = app.acquireTokenSilently(parameters).get();
 
         //update session with latest token cache
         storeTokenCacheInSession(httpRequest, app.tokenCache().serialize());
-
         return updatedResult;
     }
 
     IAuthenticationResult getAuthResultByAuthCode(
             HttpServletRequest httpServletRequest,
             AuthorizationCode authorizationCode,
-            String currentUri) throws Throwable {
+            String currentUri) {
 
+        IConfidentialClientApplication app;
         IAuthenticationResult result;
-        ConfidentialClientApplication app;
-        try {
+        try{
             app = createClientApplication();
 
             String authCode = authorizationCode.getValue();
             AuthorizationCodeParameters parameters = AuthorizationCodeParameters.builder(
-                    authCode,
-                    new URI(currentUri))
+                    authCode, new URI(currentUri))
                     .build();
 
-            Future<IAuthenticationResult> future = app.acquireToken(parameters);
+            result = app.acquireToken(parameters).get();
 
-            result = future.get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
+        } catch(Exception ex){
+            throw new AuthException(String.format("Error running authentication code flow: %s", ex.getMessage()),
+                    ex.getCause());
         }
-
         if (result == null) {
-            throw new ServiceUnavailableException("authentication result was null");
+            throw new AuthException("Authentication result is null");
         }
 
         storeTokenCacheInSession(httpServletRequest, app.tokenCache().serialize());
-
         return result;
     }
 
-    private void storeTokenCacheInSession(HttpServletRequest httpServletRequest, String tokenCache){
+    String getRedirectUrl(String state, String nonce) {
+        ConfidentialClientApplication cca = createClientApplication();
+
+        AuthorizationRequestUrlParameters parameters =
+                AuthorizationRequestUrlParameters
+                        .builder(redirectUri,
+                                new HashSet<>(Arrays.asList(oboDefaultScope)))
+                        .responseMode(ResponseMode.FORM_POST)
+                        .prompt(Prompt.SELECT_ACCOUNT)
+                        .state(state)
+                        .nonce(nonce)
+                        .build();
+
+        return cca.getAuthorizationRequestUrl(parameters).toString();
+    }
+
+    private void storeTokenCacheInSession(HttpServletRequest httpServletRequest, String tokenCache) {
         httpServletRequest.getSession().setAttribute(AuthHelper.TOKEN_CACHE_SESSION_ATTRIBUTE, tokenCache);
     }
 
@@ -127,11 +135,6 @@ class AuthHelper {
 
     void removePrincipalFromSession(HttpServletRequest httpRequest) {
         httpRequest.getSession().removeAttribute(AuthHelper.PRINCIPAL_SESSION_NAME);
-    }
-
-    void updateAuthDataUsingSilentFlow(HttpServletRequest httpRequest) throws Throwable {
-        IAuthenticationResult authResult = getAuthResultBySilentFlow(httpRequest, "https://graph.microsoft.com/.default");
-        setSessionPrincipal(httpRequest, authResult);
     }
 
     static boolean isAuthenticationSuccessful(AuthenticationResponse authResponse) {
@@ -144,7 +147,7 @@ class AuthHelper {
 
     static IAuthenticationResult getAuthSessionObject(HttpServletRequest request) {
         Object principalSession = request.getSession().getAttribute(PRINCIPAL_SESSION_NAME);
-        if(principalSession instanceof IAuthenticationResult){
+        if (principalSession instanceof IAuthenticationResult) {
             return (IAuthenticationResult) principalSession;
         } else {
             throw new IllegalStateException();
@@ -152,6 +155,7 @@ class AuthHelper {
     }
 
     static boolean containsAuthenticationCode(HttpServletRequest httpRequest) {
+
         Map<String, String[]> httpParameters = httpRequest.getParameterMap();
 
         boolean isPostRequest = httpRequest.getMethod().equalsIgnoreCase("POST");
@@ -159,14 +163,14 @@ class AuthHelper {
         boolean containIdToken = httpParameters.containsKey("id_token");
         boolean containsCode = httpParameters.containsKey("code");
 
-        return isPostRequest && containsErrorData || containsCode || containIdToken;
+        return isPostRequest && (containsErrorData || containsCode || containIdToken);
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getOboDefaultScope() {
+        return oboDefaultScope;
     }
 
-    public String getRedirectUri() {
-        return redirectUri;
+    public String getLogoutRedirectUrl() {
+        return logoutRedirectUrl;
     }
 }

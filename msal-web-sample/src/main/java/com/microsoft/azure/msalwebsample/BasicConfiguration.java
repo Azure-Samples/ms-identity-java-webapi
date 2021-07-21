@@ -12,8 +12,9 @@ class BasicConfiguration {
     String clientId;
     String authority;
     String redirectUri;
+    String logoutRedirectUri;
     String secretKey;
-    String oboApi;
+    String oboDefaultScope;
 
     public String getClientId() {
         return clientId;
@@ -30,12 +31,16 @@ class BasicConfiguration {
         return redirectUri;
     }
 
+    public String getLogoutRedirectUri() {
+        return logoutRedirectUri;
+    }
+
     public String getSecretKey() {
         return secretKey;
     }
 
-    public String getOboApi() {
-        return oboApi;
+    public String getOboDefaultScope() {
+        return oboDefaultScope;
     }
 
     public void setClientId(String clientId) {
@@ -54,7 +59,11 @@ class BasicConfiguration {
         this.secretKey = secretKey;
     }
 
-    public void setOboApi(String oboApi) {
-        this.oboApi = oboApi;
+    public void setOboDefaultScope(String oboDefaultScope) {
+        this.oboDefaultScope = oboDefaultScope;
+    }
+
+    public void setLogoutRedirectUri(String logoutRedirectUri) {
+        this.logoutRedirectUri = logoutRedirectUri;
     }
 }

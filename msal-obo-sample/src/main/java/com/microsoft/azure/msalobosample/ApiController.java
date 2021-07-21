@@ -3,44 +3,34 @@
 
 package com.microsoft.azure.msalobosample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.graph.models.User;
+import com.microsoft.graph.requests.GraphServiceClient;
+import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
-import java.net.MalformedURLException;
 
 @RestController
 public class ApiController {
 
     @Autowired
-    MsalAuthHelper msalAuthHelper;
+    OboAuthProvider oboAuthProvider;
 
     @RequestMapping("/graphMeApi")
-    public String graphMeApi() throws MalformedURLException {
+    public ResponseEntity<String> graphMeApi() {
+        try {
+            GraphServiceClient<Request> graphClient = GraphServiceClient
+                    .builder()
+                    .authenticationProvider(oboAuthProvider)
+                    .buildClient();
 
-        String oboAccessToken = msalAuthHelper.getOboToken("https://graph.microsoft.com/.default");
-
-        return callMicrosoftGraphMeEndpoint(oboAccessToken);
-    }
-
-    private String callMicrosoftGraphMeEndpoint(String accessToken){
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        headers.set("Authorization", "Bearer " + accessToken);
-
-        HttpEntity<String> entity = new HttpEntity<>(null, headers);
-
-        String result = restTemplate.exchange("https://graph.microsoft.com/v1.0/me", HttpMethod.GET,
-                entity, String.class).getBody();
-
-        return result;
+            User user = graphClient.me().buildRequest().get();
+            ObjectMapper objectMapper = new ObjectMapper();
+            return ResponseEntity.status(200).body(objectMapper.writeValueAsString(user));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(String.format("%s: %s", ex.getCause(), ex.getMessage()));
+        }
     }
 }

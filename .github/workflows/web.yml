@@ -1,12 +1,12 @@
-name: OBO Sample CI
+name: Web Sample CI
 
 on:
   push:
     branches: [ master ]
-    paths: ['msal-obo-sample/**', '.github/workflows/**']
+    paths: ['msal-web-sample/**', '.github/workflows/**']
   pull_request:
     branches: [ master ]
-    paths: ['msal-obo-sample/**', '.github/workflows/**']
+    paths: ['msal-web-sample/**', '.github/workflows/**']
 
   workflow_dispatch:
 
@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      relativePath: ./msal-obo-sample
+      relativePath: ./msal-web-sample
 
     steps:
       - uses: actions/checkout@v2

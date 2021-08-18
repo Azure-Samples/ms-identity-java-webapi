@@ -6,7 +6,7 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: maven
-  directory: "/msal-obo-sample"
+  directory: "/msal-web-sample"
   schedule:
     interval: daily
   open-pull-requests-limit: 10

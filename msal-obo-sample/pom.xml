@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.microsoft.graph</groupId>
             <artifactId>microsoft-graph</artifactId>
-            <version>5.5.0</version>
+            <version>5.39.0</version>
         </dependency>
         <!-- Spring 3 dependencies -->
         <dependency>
